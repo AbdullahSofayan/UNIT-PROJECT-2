@@ -1,0 +1,60 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}OrderNest{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+  <div class="layout-container"> <!-- START FLEX PAGE WRAPPER -->
+
+    <div class="content-wrapper"> <!-- STRETCHABLE MIDDLE -->
+
+      <div class="navbar-wrapper">
+        <nav>
+          <a href="#" class="logo">OrderNest</a>
+          <input type="checkbox" id="menu-toggle" class="menu-toggle" />
+          <label for="menu-toggle" class="hamburger">&#9776;</label>
+          <ul class="nav-links">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Browse Shops</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Login</a></li>
+            <li><a href="#">Sign Up</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <main>
+        {% block main %}
+        {% endblock %}
+      </main>
+
+    </div> <!-- end content-wrapper -->
+
+    <footer>
+        
+        <div class="coulmns">
+
+            <div class="c1">
+                <strong><h3>Order Nest</h3></strong>
+                <ul>
+                    <li>About us</li>
+                    
+                </ul>
+            </div>
+
+
+        </div>
+
+
+
+    </footer>
+
+  </div> <!-- END layout-container -->
+</body>
+</html>

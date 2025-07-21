@@ -1,0 +1,143 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+  text-decoration: none;
+  list-style: none;
+}
+
+.wrapper {
+  min-height: 100vh;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+   border-bottom: 2px solid #ccc;
+}
+.navbar-wrapper {
+  border-bottom: 2px solid #ccc;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  width: 100%;
+}
+
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 90%;
+  margin: auto;
+  padding: 20px 0;
+}
+
+.logo {
+  font-weight: bolder;
+  font-size: 2rem;
+  color: #cf8236;
+}
+
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-links li a {
+  font-size: 16px;
+  color: black;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.nav-links li a:hover {
+  color: #ff5e5e;
+}
+
+/* Hamburger toggle */
+.menu-toggle {
+  display: none;
+}
+
+.hamburger {
+  display: none;
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+
+/* Responsive for small screens */
+@media (max-width: 768px) {
+  nav {
+    flex-wrap: nowrap;
+    position: relative;
+  }
+
+  .hamburger {
+    display: block;
+    z-index: 2;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 20px;
+    gap: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: none;
+    width: 200px;
+  }
+
+  .nav-links li a {
+    display: block;
+    width: 100%;
+  }
+
+  /* Show nav links when checkbox is checked */
+  .menu-toggle:checked + .hamburger + .nav-links {
+    display: flex;
+  }
+}
+
+
+footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: start;
+  border-top: 1px solid #ccc;
+  padding: 2rem;
+  text-align: start;
+  background-color: white;
+}
+
+.left-footer {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem ;
+  gap: 5rem;
+}
+
+.icons a{
+  text-decoration: none;
+  gap: 1rem;
+}
+
+.right-footer {
+  display: flex;
+  flex-direction: row;
+  gap: 8rem;
+  padding: 1rem 6rem;
+}
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content-wrapper {
+  flex: 1;
+}
+
