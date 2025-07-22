@@ -1,5 +1,12 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %} Home {% endblock %}
 
-<!-- <img src="{% static 'images/background.jpg' %}" alt=""> -->
+{% block main %}
+<section class="hero-section">
+  <div class="hero-text">
+    <h1>Bringing You Everything Before Everyone</h1>
+    <a href="#" class="hero-btn">Browse Now</a>
+  </div>
+</section>
+{% endblock %}
