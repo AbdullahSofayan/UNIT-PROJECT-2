@@ -47,6 +47,7 @@ nav {
   color: black;
   font-weight: 500;
   transition: color 0.3s;
+  text-decoration: none;
 }
 
 .nav-links li a:hover {
@@ -116,6 +117,8 @@ nav {
 .content-wrapper {
   flex: 1;
 }
+
+
 
 
 
