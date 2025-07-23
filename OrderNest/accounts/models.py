@@ -3,6 +3,7 @@ from django.contrib.auth.hashers import make_password
 from shops.models import Shop
 
 class User(models.Model):
+    
     ROLE_CHOICES = [
         ('admin', 'Shop Admin'),
         ('customer', 'Customer'),
@@ -13,20 +14,17 @@ class User(models.Model):
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=100)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    phone = models.CharField(max_length=15, blank=True)
+    address = models.CharField(max_length=255, blank=True)
+
+    # This field is only for shop admins
+    shop = models.OneToOneField(Shop, on_delete=models.CASCADE, null=True, blank=True)
+
     created_at = models.DateField(auto_now_add=True)
 
-    class Meta:
-        abstract = True  # So Django doesn't create a table for this model
-
     def save(self, *args, **kwargs):
-        # Only hash the password if it's not already hashed
+        # Hash password only if not already hashed
         if not self.password.startswith('pbkdf2_'):
             self.password = make_password(self.password)
         super().save(*args, **kwargs)
 
-class Customer(User):
-    phone = models.CharField(max_length=15)
-    address = models.CharField(max_length=255, blank=True)
-
-class ShopAdmin(User):
-    shop = models.OneToOneField(Shop, on_delete=models.CASCADE)

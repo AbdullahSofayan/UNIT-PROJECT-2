@@ -1,33 +1,52 @@
 from django.shortcuts import render, redirect
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest
 from django.contrib.auth.hashers import check_password
-from .models import Customer
-from .forms import LoginForm, SignUpForm
+from .models import User
+from .forms import LoginForm, SignUpForm, UpdateProfileForm
+from django.shortcuts import get_object_or_404
+
 
 def login_view(request: HttpRequest):
     error_message = None
+    login_type = request.GET.get("type", "customer")  # default to customer
+
+    customer_form = LoginForm()
+    shop_form = LoginForm()
 
     if request.method == "POST":
+        login_type = request.POST.get("login_type", "customer")
         form = LoginForm(request.POST)
 
         if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
+            username = form.cleaned_data["username"]
+            password = form.cleaned_data["password"]
 
             try:
-                customer = Customer.objects.get(username=username)
-                if check_password(password, customer.password):
-                    request.session['customer_id'] = customer.id
-                    return redirect('accounts:customer_home_view')
+                user = User.objects.get(username=username, role=login_type)
+                if check_password(password, user.password):
+                    if login_type == "customer":
+                        request.session["customer_id"] = user.id
+                        return redirect("accounts:customer_home_view")
+                    elif login_type == "admin":
+                        request.session["admin_id"] = user.id
+                        return redirect("shops:shop_admin_dashboard")
                 else:
                     error_message = "Incorrect password."
-            except Customer.DoesNotExist:
+            except User.DoesNotExist:
                 error_message = "Username does not exist."
-    else:
-        form = LoginForm()
 
-    return render(request, "login.html", {"form": form, "error_message": error_message})
+        # Preserve filled form
+        if login_type == "customer":
+            customer_form = form
+        else:
+            shop_form = form
 
+    return render(request, "login.html", {
+        "error_message": error_message,
+        "login_type": login_type,
+        "customer_form": customer_form,
+        "shop_form": shop_form,
+    })
 
 
 def sign_up_view(request: HttpRequest):
@@ -43,18 +62,17 @@ def sign_up_view(request: HttpRequest):
             phone = form.cleaned_data['phone']
             address = form.cleaned_data['address']
 
-            if Customer.objects.filter(username=username).exists() or Customer.objects.filter(email=email).exists():
-                error_message = "Username or Email is already exists."
-
+            if User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
+                error_message = "Username or Email already exists."
             else:
-                Customer.objects.create(
+                User.objects.create(
                     username=username,
                     password=password,
                     full_name=full_name,
                     email=email,
-                    role = 'Customer',
-                    phone = phone,
-                    address = address
+                    role='customer',
+                    phone=phone,
+                    address=address
                 )
                 return redirect("main:home_view")
     else:
@@ -63,16 +81,72 @@ def sign_up_view(request: HttpRequest):
     return render(request, "sign_up.html", {"form": form, "error_message": error_message})
 
 
+def logout_view(request: HttpRequest):
+    request.session.flush()
+    return redirect("main:home_view")
+
+
 def customer_home_view(request: HttpRequest):
-    customer_id = request.session.get('customer_id')
+    customer_id = request.session.get("customer_id")
 
     if not customer_id:
-        return redirect('accounts:login_view') 
+        return redirect("accounts:login_view")
 
     try:
-        customer = Customer.objects.get(pk=customer_id)
-    except Customer.DoesNotExist:
+        customer = User.objects.get(pk=customer_id, role='customer')
+    except User.DoesNotExist:
+        return redirect("accounts:login_view")
+
+    return render(request, "customer_home.html", {"customer": customer})
+
+
+def shop_admin_dashboard(request: HttpRequest):
+    admin_id = request.session.get("admin_id")
+
+    if not admin_id:
+        return redirect("accounts:login_view")
+
+    try:
+        admin = User.objects.get(pk=admin_id, role='admin')
+    except User.DoesNotExist:
+        return redirect("accounts:login_view")
+
+    return render(request, "shop_admin_dashboard.html", {"admin": admin})
+
+
+
+
+def profile_view(request):
+
+    user_id = request.session.get('customer_id') or request.session.get('admin_id')
+
+    if not user_id:
         return redirect('accounts:login_view')
 
-    return render(request, "customer_home.html", {'customer': customer})
+    user = get_object_or_404(User, pk=user_id)
+    return render(request, "profile.html", {"user": user})
+
+
+def update_profile_view(request:HttpRequest):
+
+    user_id = request.session.get('customer_id') or request.session.get('admin_id')
+
+    if not user_id:
+        return redirect('accounts:login_view')
+    
+    user = get_object_or_404(User, pk=user_id)
+
+    if request.method == 'POST':
+        form = UpdateProfileForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("accounts:profile_view")
+    else:
+        form = UpdateProfileForm(instance=user)
+    
+    return render(request, "update_user.html", {"user":user, "form":form})
+
+
+def reset_password_view(request:HttpRequest):
+    pass
 

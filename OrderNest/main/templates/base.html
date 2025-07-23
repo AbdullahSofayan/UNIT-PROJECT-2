@@ -24,7 +24,7 @@
           <label for="menu-toggle" class="hamburger">&#9776;</label>
           <ul class="nav-links" style="list-style: none;">
             <li><a href="{% if request.session.customer_id %}{% url 'accounts:customer_home_view' %}{% else %}{% url 'main:home_view' %}{% endif %}">Home</a></li>
-            <li><a href="{% if request.session.customer_id %}{% url 'shops:browse_shops_view' %}{% else %}{% url 'main:home_view' %}{% endif %}">Browse Shops</a></li>
+            <li><a href="{% if request.session.customer_id %}{% url 'shops:browse_shops_view' %}{% else %}{% url 'accounts:login_view' %}{% endif %}">Browse Shops</a></li>
             {% block nav-elements %}
 
             {% endblock %}

@@ -45,6 +45,24 @@ INSERT INTO shops_branch (id, shop_id, name, location) VALUES
 (11, 11, 'Mocha Mood - Jeddah Waterfront', 'Jeddah Waterfront, Jeddah'),
 (12, 12, 'The Coffee Spot - Dammam Seaside', 'Seaside Blvd, Dammam');
 
+INSERT INTO accounts_user (
+    username, password, email, full_name, role,
+    phone, address, created_at, shop_id
+)
+VALUES (
+    'admin1122',
+    'admin',
+    'admin@shop.com',
+    'Admin Shop',
+    'admin',
+    '0555555555',
+    'Shop Street, Riyadh',
+    '2025-07-23',
+    1 
+);
+
+
+
 
 
 

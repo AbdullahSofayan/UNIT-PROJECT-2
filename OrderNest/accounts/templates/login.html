@@ -4,52 +4,87 @@
 {% block title %}Login{% endblock %}
 
 {% block nav-elements %}
-
     <li><a href="#">About</a></li>
     <li><a href="#">Contact</a></li>
     <li><a href="{% url 'accounts:login_view' %}" class="login-btn">Login</a></li>
 {% endblock %}
 
 {% block main %}
-<div class="container mt-5 ">  
-  <div class="row justify-content-center ">
-    <div class="col-md-6 col-lg-5 ">
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
       <div class="card shadow-sm p-4">
-        
-        <h3 class="text-center mb-4">Login to OrderNest</h3>
 
-        {# Show error if credentials are wrong #}
+        <!-- Login Type Toggle -->
+        <div class="d-flex justify-content-center mb-4">
+          <div class="btn-group" role="group" aria-label="Login Type Selector">
+            <a href="{% url 'accounts:login_view' %}?type=customer"
+               class="btn {% if login_type == 'customer' %}btn-dark{% else %}btn-outline-dark{% endif %}">
+              Customer
+            </a>
+            <a href="{% url 'accounts:login_view' %}?type=admin"
+               class="btn {% if login_type == 'admin' %}btn-dark{% else %}btn-outline-dark{% endif %}">
+              Shop Admin
+            </a>
+          </div>
+        </div>
+
+        <!-- Login Form -->
+        <h3 class="text-center mb-4">
+          {% if login_type == 'admin' %}Shop Admin Login{% else %}Customer Login{% endif %}
+        </h3>
+
         {% if error_message %}
           <div class="text-danger text-center mb-3">{{ error_message }}</div>
         {% endif %}
 
-        <form method="post" novalidate>
+        <form method="post">
           {% csrf_token %}
+          <input type="hidden" name="login_type" value="{{ login_type }}">
 
           <div class="mb-3">
-            {{ form.username.label_tag }}
-            {{ form.username }}
-            {% for error in form.username.errors %}
-              <div class="text-danger small">{{ error }}</div>
-            {% endfor %}
+            {{ customer_form.username.label_tag }}
+            {{ customer_form.username }}
           </div>
 
           <div class="mb-3">
-            {{ form.password.label_tag }}
-            {{ form.password }}
-            {% for error in form.password.errors %}
-              <div class="text-danger small">{{ error }}</div>
-            {% endfor %}
+            {{ customer_form.password.label_tag }}
+            {{ customer_form.password }}
           </div>
 
-          <div class="d-grid">
+          <div class="d-grid mt-3">
             <button type="submit" class="btn btn-primary">Login</button>
           </div>
         </form>
 
-        <p class="text-center mt-3">Don't have an account? <a href="{% url 'accounts:sign_up_view' %}">Sign up</a></p>
+        {% if login_type == 'customer' %}
+          <p class="text-center mt-3">
+            Don't have an account?
+            <a href="{% url 'accounts:sign_up_view' %}">Sign up</a>
+          </p>
+        {% endif %}
+
       </div>
     </div>
   </div>
 </div>
+
+<style>
+  .btn-group .btn {
+    min-width: 120px;
+  }
+
+  form input, form label {
+    width: 100%;
+  }
+
+  form label {
+    margin-bottom: 0.2rem;
+    font-weight: 500;
+  }
+
+  .btn-primary {
+    padding: 0.6rem 1rem;
+  }
+</style>
 {% endblock %}
