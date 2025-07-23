@@ -3,6 +3,12 @@
 
 {% block title %}Sign up{% endblock %}
 
+{% block nav-elements %}
+    <li><a href="#">About</a></li>
+    <li><a href="#">Contact</a></li>
+    <li><a href="{% url 'accounts:login_view' %}" class="login-btn">Login</a></li>
+{% endblock %}
+
 {% block main %}
 <div class="container mt-5 ">  
   <div class="row justify-content-center ">

@@ -2,11 +2,18 @@
 {% load static %}
 {% block title %} Home {% endblock %}
 
+{% block nav-elements %}
+
+    <li><a href="#">About</a></li>
+    <li><a href="#">Contact</a></li>
+    <li><a href="{% url 'accounts:login_view' %}" class="login-btn">Login</a></li>
+{% endblock %}
+
 {% block main %}
 <section class="hero-section">
   <div class="hero-text">
     <h1>Bringing You Everything Before Everyone</h1>
-    <a href="#" class="hero-btn">Browse Now</a>
+    <a href="{% url 'accounts:login_view' %}" class="hero-btn">Browse Now</a>
   </div>
 </section>
 {% endblock %}

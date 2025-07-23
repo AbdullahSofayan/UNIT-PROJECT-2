@@ -17,7 +17,6 @@ def login_view(request: HttpRequest):
             try:
                 customer = Customer.objects.get(username=username)
                 if check_password(password, customer.password):
-                    # ✅ Store ID in session
                     request.session['customer_id'] = customer.id
                     return redirect('accounts:customer_home_view')
                 else:

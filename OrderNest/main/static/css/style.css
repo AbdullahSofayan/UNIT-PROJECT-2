@@ -32,7 +32,7 @@ nav {
 .logo {
   font-weight: bolder;
   font-size: 2rem;
-  color: #cf8236;
+  color: #ffca2b;
 }
 
 
@@ -241,7 +241,7 @@ ul li {
   text-align: center;
   color: white;
   padding: 2rem;
-  background: rgba(0, 0, 0, 0.4); /* optional: for text readability */
+  background: rgba(0, 0, 0, 0.4); 
   border-radius: 12px;
 }
 
@@ -336,5 +336,11 @@ ul li {
 
 
 
+.card-img-top {
+  height: 360px;
+  object-fit: contain;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
 
 

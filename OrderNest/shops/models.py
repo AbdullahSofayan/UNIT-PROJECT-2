@@ -6,10 +6,11 @@ class ShopCategory(models.Model):
 
 class Shop(models.Model):
     name = models.CharField(max_length=100)
-    location = models.CharField(max_length=200)
     contact_number = models.CharField(max_length=20)
     description = models.TextField(blank=True)
     category = models.ForeignKey(ShopCategory, on_delete=models.SET_NULL, null=True, related_name='shops')
+    rating = models.FloatField(null=True, blank=True)  # New field added
+
 
 
 class Branch(models.Model):
