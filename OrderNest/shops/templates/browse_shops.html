@@ -59,10 +59,14 @@
                 <div class="col">
                     <a href="{% url 'menu:menu_view' shop.id %}" style="text-decoration: none; color: black;">
                         <div class="card h-100 shadow-sm border-0">
-                            <img src="{% static 'images/' %}{{ shop.name|slugify }}.png" ...
-                                class="card-img-top"
-                                alt="{{ shop.name }}"
-                                onerror="this.onerror=null;this.src='{% static 'images/default.jpeg' %}'">
+                        
+                <img src="{% static 'shops/images/' %}{{ shop.name|slugify }}.png"
+                    class="card-img-top"
+                    alt="{{ item.name }}"
+                    onerror="this.onerror=null;this.src='{% static 'shops/images/default.jpeg' %}'">
+                        
+                        
+                        <!-- <img src="{% static 'menu/images/default.jpeg' %}" class="card-img-top" alt="Default image"> -->
 
                             <div class="card-body">
                                 <h5 class="card-title">{{ shop.name }}</h5>
@@ -134,4 +138,6 @@
 
 
     </div>
+
+
     {% endblock %}

@@ -124,3 +124,49 @@ INSERT INTO menu_menuitem (id, name, description, price, calories, category_id) 
 (25, 'Choco Chip Cookie', 'Soft baked cookie', 8.00, 210, 24);
 
 
+INSERT INTO shops_shop (id, name, contact_number, description, category_id, rating) VALUES
+(3, 'McDonald''s', '+966920006200', 'Global fast-food chain known for burgers and fries.', 1, NULL),
+(4, 'Kudu', '+966920006999', 'Saudi-based fast-food restaurant known for sandwiches and meals.', 1, NULL),
+(5, 'Herfy', '+966920001111', 'Popular Saudi fast-food brand offering a variety of meals.', 1, NULL),
+(6, 'Dunkin'' Donuts', '+966920008899', 'American brand serving donuts, coffee, and beverages.', 2, NULL),
+(7, 'Starbucks', '+966920002482', 'International coffeehouse chain offering premium coffee and snacks.', 2, NULL),
+(8, 'Krispy Kreme', '+966920005488', 'Famous for its original glazed donuts and coffee drinks.', 2, NULL),
+(9, 'Papa John''s', '+966920000727', 'Global pizza chain with a variety of pizza and sides.', 6, NULL),
+(10, 'AlBaik', '+9668002442245', 'Famous Saudi fried chicken restaurant with unique garlic sauce.', 5, NULL),
+(11, 'Subway', '+966920025288', 'International sandwich chain offering customized healthy options.', 4, NULL),
+(12, 'Tim Hortons', '+966920002480', 'Canadian coffee and bakery shop known for Timbits and hot beverages.', 2, NULL);
+
+
+DELETE FROM shops_branch;
+
+
+UPDATE shops_shop SET id = 100 WHERE id = 3;  -- Temporary ID to avoid conflict
+UPDATE shops_shop SET id = 101 WHERE id = 4;
+UPDATE shops_shop SET id = 102 WHERE id = 5;
+UPDATE shops_shop SET id = 103 WHERE id = 6;
+UPDATE shops_shop SET id = 104 WHERE id = 7;
+UPDATE shops_shop SET id = 105 WHERE id = 8;
+UPDATE shops_shop SET id = 106 WHERE id = 9;
+UPDATE shops_shop SET id = 107 WHERE id = 10;
+UPDATE shops_shop SET id = 108 WHERE id = 11;
+UPDATE shops_shop SET id = 109 WHERE id = 12;
+
+-- Now assign the correct IDs
+UPDATE shops_shop SET id = 1 WHERE id = 13;  -- McDonald's
+UPDATE shops_shop SET id = 2 WHERE id = 101;  -- Kudu
+UPDATE shops_shop SET id = 3 WHERE id = 102;  -- Herfy
+UPDATE shops_shop SET id = 4 WHERE id = 103;  -- Dunkin'
+UPDATE shops_shop SET id = 5 WHERE id = 104;  -- Starbucks
+UPDATE shops_shop SET id = 6 WHERE id = 105;  -- Krispy Kreme
+UPDATE shops_shop SET id = 7 WHERE id = 106;  -- Papa John's
+UPDATE shops_shop SET id = 8 WHERE id = 107;  -- AlBaik
+UPDATE shops_shop SET id = 9 WHERE id = 108;  -- Subway
+UPDATE shops_shop SET id = 10 WHERE id = 109; -- Tim Hortons
+
+UPDATE menu_menucategory SET shop_id = 1 where id = 25; 
+UPDATE menu_menucategory SET shop_id = 1 where id = 26; 
+
+UPDATE shops_shop SET name = "McDonald's" WHERE id = 1;
+
+
+ALTER TABLE shops_shop DROP COLUMN image;

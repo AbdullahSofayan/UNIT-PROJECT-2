@@ -9,7 +9,8 @@ class Shop(models.Model):
     contact_number = models.CharField(max_length=20)
     description = models.TextField(blank=True)
     category = models.ForeignKey(ShopCategory, on_delete=models.SET_NULL, null=True, related_name='shops')
-    rating = models.FloatField(null=True, blank=True)  # New field added
+    rating = models.FloatField(null=True, blank=True)  
+
 
 
 

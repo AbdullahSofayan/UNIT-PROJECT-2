@@ -5,9 +5,14 @@ from shops.models import Shop
 # Create your models here.
 
 class MenuCategory(models.Model):
-
     name = models.CharField(max_length=100)
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name="categories")
+
+    class Meta:
+        unique_together = ('name', 'shop')  # optional, prevents duplicate categories per shop
+
+
+
 
 class MenuItem(models.Model):
 
@@ -16,3 +21,5 @@ class MenuItem(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2)
     calories = models.PositiveBigIntegerField(blank=True, null=True)
     category = models.ForeignKey(MenuCategory, on_delete=models.CASCADE, related_name="items")
+    image = models.CharField(max_length=100, blank=True, null=True)  
+
