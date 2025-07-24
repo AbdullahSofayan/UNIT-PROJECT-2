@@ -10,6 +10,27 @@
 {% endblock %}
 
 {% block main %}
+  {% if messages %}
+    <div class="container mt-3">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm rounded text-center" role="alert">
+          {% if message.tags == "success" %}
+            <i class="bi bi-check-circle-fill me-2"></i>
+          {% elif message.tags == "error" %}
+            <i class="bi bi-exclamation-circle-fill me-2"></i>
+          {% elif message.tags == "warning" %}
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          {% else %}
+            <i class="bi bi-info-circle-fill me-2"></i>
+          {% endif %}
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+
 <div class="container my-5">
   <div class="row justify-content-center">
     <div class="col-md-8">
@@ -33,7 +54,7 @@
           <div class="d-grid mt-4">
             <button type="submit" class="btn btn-primary">Update</button>
             <p class="text-center mt-3">
-            Forgot your password?
+            Change your password?
             <a href="#" data-bs-toggle="modal" data-bs-target="#resetPasswordModal">Reset</a>
             </p>
 
@@ -55,15 +76,22 @@
         <form method="post" action="{% url 'accounts:reset_password_view' %}">
           {% csrf_token %}
           <div class="mb-3">
-            <label for="email" class="form-label">Enter your registered email</label>
-            <input type="email" class="form-control" id="email" name="email" required placeholder="Email address">
+            <label for="old-pass" class="form-label">Enter old password</label>
+            <input type="password" class="form-control" id="old-pass" name="old-pass" required placeholder="Old password">
           </div>
+
           <div class="mb-3">
-            <label for="email" class="form-label">Enter your registered email</label>
-            <input type="email" class="form-control" id="email" name="email" required placeholder="Email address">
+            <label for="new-pass" class="form-label">Enter new password</label>
+            <input type="password" class="form-control" id="new-pass" name="new-pass" required placeholder="New password">
           </div>
+
+          <div class="mb-3">
+            <label for="confirm-pass" class="form-label">Confirm password</label>
+            <input type="password" class="form-control" id="confirm-pass" name="confirm-pass" required placeholder="Confirm password">
+          </div>
+
           <div class="d-grid">
-            <button type="submit" class="btn btn-primary">Send Reset Link</button>
+            <button type="submit" class="btn btn-primary">Update Password</button>
           </div>
         </form>
       </div>

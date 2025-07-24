@@ -1,6 +1,7 @@
+from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.http import HttpRequest
-from django.contrib.auth.hashers import check_password
+from django.contrib.auth.hashers import check_password, make_password
 from .models import User
 from .forms import LoginForm, SignUpForm, UpdateProfileForm
 from django.shortcuts import get_object_or_404
@@ -137,7 +138,8 @@ def update_profile_view(request:HttpRequest):
     user = get_object_or_404(User, pk=user_id)
 
     if request.method == 'POST':
-        form = UpdateProfileForm(request.POST)
+        form = UpdateProfileForm(request.POST, instance=user)
+
         if form.is_valid():
             form.save()
             return redirect("accounts:profile_view")
@@ -148,5 +150,25 @@ def update_profile_view(request:HttpRequest):
 
 
 def reset_password_view(request:HttpRequest):
-    pass
+
+    user_id = request.session.get('customer_id') or request.session.get('admin_id')
+    user = get_object_or_404(User, pk=user_id)
+
+    if request.method == "POST":
+        
+        old_pass = request.POST.get("old-pass")
+        new_pass = request.POST.get("new-pass")
+        confirm_pass = request.POST.get("confirm-pass")
+
+
+        if not check_password(old_pass, user.password):
+            messages.error(request, "old password is incorrect.")
+        elif new_pass != confirm_pass:
+            messages.error(request, "New passwords do not match.")
+
+        else:
+            user.password = make_password(new_pass)
+            user.save()
+            messages.success(request, "Password updated successfully.")
+        return redirect("accounts:update_profile_view")
 

@@ -35,6 +35,9 @@ nav {
   color: #ffca2b;
 }
 
+html {
+  scroll-behavior: smooth;
+}
 
 .nav-links {
   display: flex;

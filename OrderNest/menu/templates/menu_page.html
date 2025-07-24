@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} {{ shop.name }} Menu {% endblock %}
+
+{% block nav-elements %}
+    <li><a href="#">My orders</a></li>
+    <li><a href="{% url 'accounts:profile_view' %}">Profile</a></li>
+    <li><a href="{% url 'main:home_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+{% endblock %}
+
+{% block main %}
+<div class="container-fluid py-4">
+  <div class="row">
+
+    <!-- Sidebar -->
+    <div class="col-md-2">
+    <ul class="list-group sticky-top">
+        {% for category in categories %}
+        <a href="#cat-{{ category.id }}" class="list-group-item list-group-item-action {% if forloop.first %}active bg-warning text-dark{% endif %}">
+            {{ category.name }}
+        </a>
+        {% endfor %}
+    </ul>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const links = document.querySelectorAll(".list-group-item");
+
+            links.forEach(link => {
+            link.addEventListener("click", function () {
+                links.forEach(l => l.classList.remove("active", "bg-warning", "text-dark"));
+                this.classList.add("active", "bg-warning", "text-dark");
+            });
+            });
+        });
+    </script>
+
+    <!-- Main Menu Items -->
+    <div class="col-md-10">
+      {% for category in categories %}
+      <div id="cat-{{ category.id }}" class="mb-5">
+        <h4 class="mb-4 mt-3 border-bottom pb-2">{{ category.name }}</h4>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+          {% for item in category.items.all %}
+          <div class="col">
+            <div class="card h-100 shadow-sm">
+                <img src="{% static 'menu/images/' %}{{ item.name|slugify }}.jpg"
+                    class="card-img-top"
+                    alt="{{ item.name }}"
+                    onerror="this.onerror=null;this.src='{% static 'menu/images/default.jpeg' %}'">
+
+
+              <div class="card-body">
+                <h5 class="card-title">{{ item.name }}</h5>
+                <p class="card-text text-muted small">{{ item.description|default:"" }}</p>
+              </div>
+              <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+                <span class="text-success fw-bold">{{ item.price }} SR</span>
+                {% if item.calories %}
+                <span class="text-muted small"><i class="bi bi-fire"></i> {{ item.calories }} cal</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <p>No items in this category.</p>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}
