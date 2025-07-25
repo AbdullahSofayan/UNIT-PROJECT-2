@@ -1,11 +1,17 @@
 {% extends 'base.html' %}
 {% block title %}Add Menu Item - {{ category.name }}{% endblock %}
 
+{% block nav-elements %}
+    <li><a href="{% url 'shops:shop_details_view' admin.shop.id %}">Shop</a></li>
+    <li><a href="{% url 'accounts:profile_view' %}">Profile</a></li>
+    <li><a href="{% url 'accounts:logout_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+{% endblock %}
+
 {% block main %}
 <div class="container py-5">
     <h2>Add Item to "{{ category.name }}"</h2>
 
-<form method="POST" enctype="multipart/form-data">  <!-- 👈 Required for file uploads -->
+<form method="POST" enctype="multipart/form-data"> 
     {% csrf_token %}
     {% for field in form %}
         <div class="mb-3">

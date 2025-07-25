@@ -6,7 +6,7 @@
 {% block nav-elements %}
     <li><a href="{% url 'shops:shop_details_view' admin.shop.id %}">Shop</a></li>
     <li><a href="{% url 'accounts:profile_view' %}">Profile</a></li>
-    <li><a href="{% url 'main:home_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+    <li><a href="{% url 'accounts:logout_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
 {% endblock %}
 
 {% block main %}
