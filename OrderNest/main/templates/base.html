@@ -21,12 +21,12 @@
 
       <div class="navbar-wrapper">
         <nav>
-          <a href="{% if request.session.customer_id %}{% url 'accounts:customer_home_view' %}{% else %}{% url 'main:home_view' %}{% endif %}" class="logo" style="text-decoration: none;">OrderNest</a>
+          <a href="{% if request.session.customer_id %}{% url 'accounts:customer_home_view' %}{% elif request.session.admin_id %}{% url 'shops:shop_admin_dashboard' %}{% else %}{% url 'main:home_view' %}{% endif %}" class="logo" style="text-decoration: none;">OrderNest</a>
           <input type="checkbox" id="menu-toggle" class="menu-toggle" />
           <label for="menu-toggle" class="hamburger">&#9776;</label>
           <ul class="nav-links" style="list-style: none;">
-            <li><a href="{% if request.session.customer_id %}{% url 'accounts:customer_home_view' %}{% else %}{% url 'main:home_view' %}{% endif %}">Home</a></li>
-            <li><a href="{% if request.session.customer_id %}{% url 'shops:browse_shops_view' %}{% else %}{% url 'accounts:login_view' %}{% endif %}">Browse Shops</a></li>
+            <li><a href="{% if request.session.customer_id %}{% url 'accounts:customer_home_view' %}{% elif request.session.admin_id %}{% url 'shops:shop_admin_dashboard' %}{% else %}{% url 'main:home_view' %}{% endif %}">Home</a></li>
+            {% if not request.session.admin_id %} <li><a href="{% if request.session.customer_id %}{% url 'shops:browse_shops_view' %}{% else %}{% url 'accounts:login_view' %}{% endif %}">Browse Shops</a></li> {% endif %}
             {% block nav-elements %}
 
             {% endblock %}

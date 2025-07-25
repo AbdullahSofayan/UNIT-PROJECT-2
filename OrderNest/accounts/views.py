@@ -101,18 +101,7 @@ def customer_home_view(request: HttpRequest):
     return render(request, "customer_home.html", {"customer": customer})
 
 
-def shop_admin_dashboard(request: HttpRequest):
-    admin_id = request.session.get("admin_id")
 
-    if not admin_id:
-        return redirect("accounts:login_view")
-
-    try:
-        admin = User.objects.get(pk=admin_id, role='admin')
-    except User.DoesNotExist:
-        return redirect("accounts:login_view")
-
-    return render(request, "shop_admin_dashboard.html", {"admin": admin})
 
 
 

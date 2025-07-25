@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.http import HttpRequest
 from django.core.paginator import Paginator
+
+from accounts.models import User
 from .models import Shop, Branch, ShopCategory
 
 
@@ -37,4 +39,23 @@ def branches_view(request:HttpRequest, shop_id):
     branches = Branch.objects.filter(shop__id=shop_id)
     shop = Shop.objects.get(pk=shop_id)
     return render(request, "branches.html", {'branches':branches, 'shop':shop})
+
+def shop_admin_dashboard(request: HttpRequest):
+    admin_id = request.session.get("admin_id")
+
+    if not admin_id:
+        return redirect("accounts:login_view")
+
+    try:
+        admin = User.objects.get(pk=admin_id, role='admin')
+    except User.DoesNotExist:
+        return redirect("accounts:login_view")
+
+    return render(request, "shop_admin_dashboard.html", {"admin": admin})
+
+
+def shop_details_view(request: HttpRequest, shop_id):
+    shop = Shop.objects.get(pk=shop_id)
+
+    return render(request, "shop_details.html", {"shop":shop})
 

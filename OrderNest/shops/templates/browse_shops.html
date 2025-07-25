@@ -60,13 +60,12 @@
                     <a href="{% url 'menu:menu_view' shop.id %}" style="text-decoration: none; color: black;">
                         <div class="card h-100 shadow-sm border-0">
                         
-                <img src="{% static 'shops/images/' %}{{ shop.name|slugify }}.png"
-                    class="card-img-top"
-                    alt="{{ item.name }}"
-                    onerror="this.onerror=null;this.src='{% static 'shops/images/default.jpeg' %}'">
-                        
-                        
-                        <!-- <img src="{% static 'menu/images/default.jpeg' %}" class="card-img-top" alt="Default image"> -->
+                            <img src="{% static 'shops/images/' %}{{ shop.name|slugify }}.png"
+                                class="card-img-top"
+                                alt="{{ item.name }}"
+                                onerror="this.onerror=null;this.src='{% static 'shops/images/default.jpeg' %}'">
+                                    
+                                    
 
                             <div class="card-body">
                                 <h5 class="card-title">{{ shop.name }}</h5>
@@ -76,9 +75,9 @@
                                 <p class="card-text text-muted mb-1"><strong>Category:</strong> {{ shop.category.name }}</p>
                                 <p class="card-text mt-2">{{ shop.description|truncatewords:20 }}</p>
                             </div>
-                            <div class="card-footer bg-transparent border-0 text-end">
-                                <a href="{% url 'shops:branches_view' shop.id %}" class="btn btn-sm btn-warning">View Branches</a>
-                            </div>
+                                    <div class="card-footer bg-transparent border-0 text-end">
+                                        <a href="{% url 'shops:branches_view' shop.id %}" class="btn btn-sm btn-warning">View Branches</a>
+                                    </div>
                         </div>
                     </a>
                 </div>

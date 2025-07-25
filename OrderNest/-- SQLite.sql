@@ -50,14 +50,15 @@ INSERT INTO accounts_user (
 VALUES (
     'admin1122',
     'admin',
-    'admin@shop.com',
+    'admin11@shop.com',
     'Admin Shop',
     'admin',
-    '0555555555',
+    '0537348135',
     'Shop Street, Riyadh',
     '2025-07-23',
     1 
 );
+
 
 
 DELETE FROM shops_shop
@@ -154,7 +155,7 @@ UPDATE shops_shop SET id = 109 WHERE id = 12;
 -- Now assign the correct IDs
 UPDATE shops_shop SET id = 1 WHERE id = 13;  -- McDonald's
 UPDATE shops_shop SET id = 2 WHERE id = 101;  -- Kudu
-UPDATE shops_shop SET id = 3 WHERE id = 102;  -- Herfy
+UPDATE shops_shop SET id = 3 WHERE id = 14;  -- Herfy
 UPDATE shops_shop SET id = 4 WHERE id = 103;  -- Dunkin'
 UPDATE shops_shop SET id = 5 WHERE id = 104;  -- Starbucks
 UPDATE shops_shop SET id = 6 WHERE id = 105;  -- Krispy Kreme
@@ -170,3 +171,9 @@ UPDATE shops_shop SET name = "McDonald's" WHERE id = 1;
 
 
 ALTER TABLE shops_shop DROP COLUMN image;
+
+
+DELETE FROM menu_menuitem WHERE id = 29;
+
+
+UPDATE accounts_user set password = "admin" where id = 2;

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} {{ admin.shop.name }} Admin Dashboard {% endblock %}
+
+{% block nav-elements %}
+    <li><a href="{% url 'shops:shop_details_view' admin.shop.id %}">Shop</a></li>
+    <li><a href="{% url 'accounts:profile_view' %}">Profile</a></li>
+    <li><a href="{% url 'main:home_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+{% endblock %}
+
+{% block main %}
+
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">{{ admin.shop.name }} Dashboard</h1>
+        <h4 class="text-muted">Welcome, {{ admin.username }}</h4>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center">
+
+        <!-- Manage Menu -->
+        <div class="col">
+            <div class="card h-100 text-center shadow-lg border border-2 rounded-4 hover-card">
+
+                <div class="card-body">
+                    <i class="bi bi-card-list display-4 text-primary mb-3"></i>
+                    <h5 class="card-title">Manage Menu</h5>
+                    <p class="card-text text-muted">Add, update, or delete menu items for your shop.</p>
+                    <a href="{% url 'menu:manage_menu' admin.shop.id %}" class="btn btn-primary px-4">Go</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Orders -->
+        <div class="col">
+            <div class="card h-100 text-center shadow-lg border border-2 rounded-4 hover-card">
+
+                <div class="card-body">
+                    <i class="bi bi-bag-check display-4 text-success mb-3"></i>
+                    <h5 class="card-title">Orders</h5>
+                    <p class="card-text text-muted">View and manage customer orders in real-time.</p>
+                    <a href="#" class="btn btn-success px-4">Go</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+  .hover-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-title {
+    font-weight: 600;
+  }
+
+  .btn {
+    border-radius: 25px;
+  }
+</style>
+
+{% endblock %}

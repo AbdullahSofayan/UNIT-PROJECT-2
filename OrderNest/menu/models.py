@@ -21,5 +21,6 @@ class MenuItem(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2)
     calories = models.PositiveBigIntegerField(blank=True, null=True)
     category = models.ForeignKey(MenuCategory, on_delete=models.CASCADE, related_name="items")
-    image = models.CharField(max_length=100, blank=True, null=True)  
+    image = models.ImageField(upload_to='images/', default="images/default.jpeg")
+
 
