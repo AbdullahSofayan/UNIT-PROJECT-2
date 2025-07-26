@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Update {{ shop.name }} {% endblock %}
+
+{% block nav-elements %}
+    <li><a href="{% url 'accounts:profile_view' %}">Shop</a></li>
+    <li><a href="{% url 'accounts:profile_view' %}">Profile</a></li>
+    <li><a href="{% url 'accounts:logout_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+{% endblock %}
+
+{% block main %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow p-4">
+        <h3 class="mb-4">Update Profile</h3>
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          {% for field in form %}
+            <div class="mb-3">
+              {{ field.label_tag }}
+              {{ field }}
+              {% if field.errors %}
+                <div class="text-danger small">
+                  {{ field.errors|striptags }}
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-primary">Update</button>
+
+
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

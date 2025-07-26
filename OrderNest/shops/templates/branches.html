@@ -11,18 +11,35 @@
 
 {% block main %}  
 <div class="container py-5">
-  <h2 class="text-center mb-4">{{shop.name}} branches :</h2>
+  
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">{{ shop.name }} branches :</h2>
+    {% if request.session.admin_id %}
+      <a href="{% url 'shops:add_branch_view' shop.id %}" class="btn btn-sm btn-success">+ Add Branch</a>
+      {% endif %}
+  </div>
 
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
     {% for branch in branches %}
-    <div class="col">
-      <div class="card h-100 shadow-sm border-0">
-        <div class="card-body">
-          <h5 class="card-title">{{ branch.name }}</h5>
-          <p class="card-text text-muted mb-1"><strong>Location:</strong> {{ branch.location }}</p>
+      <div class="col">
+        <div class="card h-100 shadow-sm border-0">
+          <div class="card-body">
+            <h5 class="card-title">{{ branch.name }}</h5>
+            <p class="card-text text-muted mb-1"><strong>Location:</strong> {{ branch.location }}</p>
+
+            {% if branch.latitude and branch.longitude %}
+              <a href="https://www.google.com/maps?q={{ branch.latitude }},{{ branch.longitude }}"
+                target="_blank" class="btn btn-outline-primary mt-2">
+                Go to the Branch
+              </a>
+            {% else %}
+              <p class="text-danger mt-2">Location not available</p>
+            {% endif %}
+          </div>
         </div>
       </div>
-    </div>
+    
+
     {% empty %}
     <div class="col">
       <p>No Branches available at the moment.</p>

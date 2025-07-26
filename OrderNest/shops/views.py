@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from django.http import HttpRequest
 from django.core.paginator import Paginator
 
+from OrderNest import settings
+from .forms import UpdateShopform, BranchForm
 from accounts.models import User
 from .models import Shop, Branch, ShopCategory
 
@@ -54,8 +56,42 @@ def shop_admin_dashboard(request: HttpRequest):
     return render(request, "shop_admin_dashboard.html", {"admin": admin})
 
 
+
+
+
 def shop_details_view(request: HttpRequest, shop_id):
     shop = Shop.objects.get(pk=shop_id)
+    category_id = shop.category_id
+    category = ShopCategory.objects.get(pk=category_id)
+    
+    return render(request, 'shop_details.html', {'shop':shop, 'category':category})
 
-    return render(request, "shop_details.html", {"shop":shop})
 
+def shop_update_view(request: HttpRequest, shop_id):
+    shop = Shop.objects.get(pk=shop_id)
+
+    if request.method == 'POST':
+        form = UpdateShopform(request.POST,instance=shop)
+        if form.is_valid():
+            form.save()
+            return redirect("shops:shop_details_view", shop_id)
+    else:
+        form = UpdateShopform(instance=shop)
+
+    return render(request, "update_shop.html", {'shop':shop, 'form':form})
+
+def add_branch_view(request: HttpRequest, shop_id):
+    shop = Shop.objects.get(pk=shop_id)
+
+    if request.method == "POST":
+        form = BranchForm(request.POST)
+        if form.is_valid():
+            branch = form.save(commit=False)
+            branch.shop = shop
+            branch.save()
+            return redirect('shops:branches_view', shop_id=shop.id)
+    else:
+        form = BranchForm() 
+
+
+    return render(request, 'add_branch.html', {'form': form, 'shop': shop ,'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY})

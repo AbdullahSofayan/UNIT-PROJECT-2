@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add Branch - {{ shop.name }}{% endblock %}
+
+{% block nav-elements %}
+    <li><a href="{% url 'accounts:profile_view' %}">Shop</a></li>
+    <li><a href="{% url 'accounts:profile_view' %}">Profile</a></li>
+    <li><a href="{% url 'accounts:logout_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+{% endblock %}
+
+{% block main %}
+<div class="container py-5">
+  <h2 class="mb-4">Add Branch for {{ shop.name }}</h2>
+
+  <div class="row g-4 align-items-start">
+    <!-- Form -->
+    <div class="col-md-6 order-2 order-md-1">
+      <form method="post" class="shadow p-4 rounded bg-light">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <div class="text-end">
+          <button type="submit" class="btn btn-primary">Add Branch</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Map -->
+    <div class="col-md-6 order-1 order-md-2">
+      <div id="map" class="rounded shadow-sm" style="height: 400px; aspect-ratio: 1 / 1;"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Google Maps JS API -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap" async defer></script>
+
+<script>
+  let map;
+  let marker;
+  let geocoder;
+
+  function initMap() {
+    const defaultLocation = { lat: 24.7136, lng: 46.6753 }; // Riyadh
+    map = new google.maps.Map(document.getElementById("map"), {
+      zoom: 12,
+      center: defaultLocation,
+    });
+
+    geocoder = new google.maps.Geocoder();
+
+    map.addListener("click", function (e) {
+      const lat = e.latLng.lat();
+      const lng = e.latLng.lng();
+
+      if (marker) {
+        marker.setPosition(e.latLng);
+      } else {
+        marker = new google.maps.Marker({
+          position: e.latLng,
+          map: map,
+        });
+      }
+
+      // Fill the hidden form fields
+      document.getElementById("id_latitude").value = lat;
+      document.getElementById("id_longitude").value = lng;
+
+      // Get address and fill it
+      geocoder.geocode({ location: { lat: lat, lng: lng } }, function (results, status) {
+        if (status === "OK") {
+          if (results[0]) {
+            const address = results[0].formatted_address;
+            document.getElementById("id_location").value = address;
+          } else {
+            alert("No address found");
+          }
+        } else {
+          alert("Geocoder failed: " + status);
+        }
+      });
+    });
+  }
+</script>
+{% endblock %}

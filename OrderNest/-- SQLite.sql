@@ -48,14 +48,14 @@ INSERT INTO accounts_user (
     phone, address, created_at, shop_id
 )
 VALUES (
-    'admin1122',
+    'mcdonalds',
+    'pbkdf2_sha256$1000000$NNhKc3tKoXoWoc36HYo61V$oVMRNlBjKFYt766N1pg033/cmizzejchwZ3m1TdaHcE=',
+    'admin1122@shop.com',
+    'mcdonalds Shop',
     'admin',
-    'admin11@shop.com',
-    'Admin Shop',
-    'admin',
-    '0537348135',
+    '0537348130',
     'Shop Street, Riyadh',
-    '2025-07-23',
+    '2025-07-26',
     1 
 );
 
@@ -173,7 +173,9 @@ UPDATE shops_shop SET name = "McDonald's" WHERE id = 1;
 ALTER TABLE shops_shop DROP COLUMN image;
 
 
-DELETE FROM menu_menuitem WHERE id = 29;
+DELETE FROM accounts_user WHERE id = 2;
 
 
-UPDATE accounts_user set password = "admin" where id = 2;
+UPDATE accounts_user set password = "pbkdf2_sha256$1000000$NNhKc3tKoXoWoc36HYo61V$oVMRNlBjKFYt766N1pg033/cmizzejchwZ3m1TdaHcE=" where id = 5;
+
+INSERT INTO accounts_user ()

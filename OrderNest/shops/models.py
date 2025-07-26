@@ -3,6 +3,9 @@ from django.db import models
 # Create your models here.
 class ShopCategory(models.Model):
     name = models.CharField(max_length=50)
+    
+    def __str__(self):
+        return self.name
 
 class Shop(models.Model):
     name = models.CharField(max_length=100)
@@ -18,3 +21,5 @@ class Branch(models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name='branches')
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=200)
+    latitude = models.FloatField(default=0.0)
+    longitude = models.FloatField(default=0.0)

@@ -13,29 +13,32 @@
 <div class="container-fluid py-4">
   <div class="row">
 
-    <!-- Sidebar -->
-    <div class="col-md-2">
-    <ul class="list-group sticky-top">
-        {% for category in categories %}
-        <a href="#cat-{{ category.id }}" class="list-group-item list-group-item-action {% if forloop.first %}active bg-warning text-dark{% endif %}">
-            {{ category.name }}
+  <div class="scrolling-wrapper-wrapper sticky-top bg-white py-2 border-bottom" style="z-index: 1020;">
+    <div class="scrolling-wrapper d-flex flex-nowrap px-3">
+      {% for category in categories %}
+        <a href="#cat-{{ category.id }}"
+          class="category-tab px-3 py-2 me-2 text-decoration-none {% if forloop.first %}active{% endif %}">
+          {{ category.name }}
         </a>
-        {% endfor %}
-    </ul>
+      {% endfor %}
     </div>
+  </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const links = document.querySelectorAll(".list-group-item");
 
-            links.forEach(link => {
-            link.addEventListener("click", function () {
-                links.forEach(l => l.classList.remove("active", "bg-warning", "text-dark"));
-                this.classList.add("active", "bg-warning", "text-dark");
-            });
-            });
-        });
-    </script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tabs = document.querySelectorAll(".category-tab");
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", function () {
+        tabs.forEach(t => t.classList.remove("active"));
+        this.classList.add("active");
+      });
+    });
+  });
+</script>
+
+
 
     <!-- Main Menu Items -->
     <div class="col-md-10">
@@ -75,4 +78,30 @@
 
   </div>
 </div>
+
+<style>
+  .scrolling-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .category-tab {
+    border-bottom: 3px solid transparent;
+    font-weight: 500;
+    color: #555;
+    white-space: nowrap;
+  }
+
+  .category-tab.active {
+    border-bottom: 3px solid #ffc107;
+    color: #000;
+    font-weight: bold;
+  }
+
+  .category-tab:hover {
+    text-decoration: none;
+    color: #000;
+  }
+</style>
+
 {% endblock %}

@@ -44,6 +44,18 @@
                 </div>
             </div>
         </div>
+        
+        <!-- View Branches -->
+        <div class="col">
+            <div class="card h-100 text-center shadow-lg border border-2 rounded-4 hover-card">
+                <div class="card-body">
+                    <i class="bi bi-geo-alt display-4 text-warning mb-3"></i>
+                    <h5 class="card-title">Branches</h5>
+                    <p class="card-text text-muted">View and manage all your shop's branches and locations.</p>
+                    <a href="{% url 'shops:branches_view' admin.shop.id %}" class="btn btn-warning px-4 text-white">Go</a>
+                </div>
+            </div>
+        </div>        
 
     </div>
 </div>
