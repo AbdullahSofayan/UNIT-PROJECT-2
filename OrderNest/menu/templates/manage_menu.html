@@ -54,10 +54,10 @@
         <div class="card-body">
             <h5 class="card-title">{{ item.name }}</h5>
             <p class="card-text">{{ item.description|default:"No description." }}</p>
-<img src="{% if item.image %}{{ item.image.url }}{% else %}{% static 'menu/images/default.jpeg' %}{% endif %}" 
-     alt="{{ item.name }}" 
-     class="img-fluid rounded mb-2" 
-     style="max-height: 200px;">            <p><strong>Price:</strong> {{ item.price }} SR</p>
+      <img src="{% if item.image %}{{ item.image.url }}{% else %}{% static 'menu/images/default.jpeg' %}{% endif %}" 
+          alt="{{ item.name }}" 
+          class="img-fluid rounded mb-2" 
+          style="max-height: 200px;">            <p><strong>Price:</strong> {{ item.price }} SR</p>
             {% if item.calories %}
             <p><i class="bi bi-fire"></i> {{ item.calories }} cal</p>
             {% endif %}
@@ -112,26 +112,27 @@
 </div>
 {% endfor %}
 
-        </div>
     </div>
-                <div class="modal fade" id="deleteModal-{{ category.id }}" tabindex="-1" aria-labelledby="deleteModalLabel-{{ category.id }}" aria-hidden="true">
-              <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel-{{ category.id }}">Confirm Delete</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                    Are you sure you want to delete <strong>{{ category.name }}</strong>?
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <a href="{% url 'menu:delete_menu_category_view' shop.id category.id %}" class="btn btn-danger">Delete</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-    
+  </div>
+
+
+          <div class="modal fade" id="deleteModal-{{ category.id }}" tabindex="-1" aria-labelledby="deleteModalLabel-{{ category.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel-{{ category.id }}">Confirm Delete</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete <strong>{{ category.name }}</strong>?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <a href="{% url 'menu:delete_menu_category_view' shop.id category.id %}" class="btn btn-danger">Delete</a>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endfor %}
 
 </div>
