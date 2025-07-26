@@ -49,10 +49,10 @@
           {% for item in category.items.all %}
           <div class="col">
             <div class="card h-100 shadow-sm">
-<img src="{{ item.image.url }}"
-     class="card-img-top"
-     alt="{{ item.name }}"
-     onerror="this.onerror=null;this.src='{% static 'menu/images/default.jpeg' %}'">
+            <img src="{% if item.image %}{{ item.image.url }}{% else %}{% static 'menu/images/default.jpeg' %}{% endif %}"
+                class="card-img-top"
+                alt="{{ item.name }}">
+
 
 
 

@@ -15,12 +15,13 @@ class MenuCategory(models.Model):
 
 
 class MenuItem(models.Model):
-
     name = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, null=True)
     price = models.DecimalField(max_digits=6, decimal_places=2)
-    calories = models.PositiveBigIntegerField(blank=True, null=True)
-    category = models.ForeignKey(MenuCategory, on_delete=models.CASCADE, related_name="items")
-    image = models.ImageField(upload_to='images/', default="images/default.jpeg")
+    calories = models.PositiveIntegerField(null=True, blank=True)
+    image = models.ImageField(upload_to="menu/images/", blank=True, null=True)
+    category = models.ForeignKey(MenuCategory, related_name="items", on_delete=models.CASCADE)
+    shop = models.ForeignKey(Shop, on_delete=models.CASCADE)
+
 
 

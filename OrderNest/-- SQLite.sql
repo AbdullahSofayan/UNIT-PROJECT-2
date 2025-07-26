@@ -179,3 +179,37 @@ DELETE FROM accounts_user WHERE id = 2;
 UPDATE accounts_user set password = "pbkdf2_sha256$1000000$NNhKc3tKoXoWoc36HYo61V$oVMRNlBjKFYt766N1pg033/cmizzejchwZ3m1TdaHcE=" where id = 5;
 
 INSERT INTO accounts_user ()
+
+
+INSERT INTO menu_menuitem (name, description, price, calories, category_id)
+VALUES 
+('McCrispy Chicken', 'Chicken sandwich', 25, 450, 29),
+('McCrispy Chicken Deluxe', 'Deluxe chicken sandwich', 27, 480, 29),
+('Big Tasty', 'Big beef burger', 28, 510, 29),
+('Big Tasty Chicken', 'Chicken version of Big Tasty', 26, 500, 29),
+('Grand Chicken Special', 'Special chicken sandwich', 27, 530, 29),
+('Big Tasty Mushroom', 'Mushroom beef burger', 29, 550, 29),
+('Grand Chicken Spicy', 'Spicy chicken sandwich', 26, 460, 29),
+('Grand Chicken Deluxe', 'Deluxe Grand Chicken', 28, 490, 29),
+('Big Mac', 'Double beef patties with lettuce, cheese, pickles, and special sauce', 25, 258, 29),
+('Chicken Mac', 'Double chicken patties', 24, 420, 29),
+('Spicy McChicken', 'Spicy version of McChicken', 22, 400, 29),
+('McChicken', 'Classic chicken burger', 20, 380, 29),
+('Quarter Pounder', 'Beef patty with cheese', 23, 430, 29),
+('Chicken McArabia', 'Grilled chicken with Arabic bread', 27, 410, 29),
+('Chicken McNuggets', 'Chicken nuggets 6 pcs', 18, 300, 29),
+('Triple Cheeseburger', 'Triple layers of cheese and beef', 30, 600, 29),
+('Little Tasty Chicken', 'Mini Big Tasty Chicken', 19, 350, 29),
+('McWings Peri Peri', 'Spicy chicken wings', 22, 320, 29),
+('McWings Chicken Regular', 'Regular wings', 20, 300, 29),
+('Double Cheeseburger', 'Double beef and cheese', 28, 580, 29),
+('Chicken Burger', 'Simple chicken sandwich', 15, 260, 29),
+('Cheeseburger', 'Classic cheeseburger', 18, 300, 29),
+('Beef Burger', 'Grilled beef patty', 21, 310, 29),
+('Mini Kofta', 'Small kofta wrap', 20, 280, 29),
+('Mini Arabia', 'Mini Arabic sandwich', 17, 250, 29),
+('McArabia Kofta', 'Kofta with Arabic bread', 27, 350, 29),
+('McRoyale', 'Premium beef burger', 32, 650, 29);
+
+UPDATE menu_menuitem SET category_id = 25 WHERE category_id = 29;
+

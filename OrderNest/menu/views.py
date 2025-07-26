@@ -36,6 +36,7 @@ def add_menu_item_view(request: HttpRequest, shop_id, category_id):
         if form.is_valid():
             item = form.save(commit=False)
             item.category = category
+            item.shop = shop  # ✅ important
             item.save()
             return redirect('menu:manage_menu', shop_id=shop.id)
     else:
@@ -46,6 +47,7 @@ def add_menu_item_view(request: HttpRequest, shop_id, category_id):
         'shop': shop,
         'category': category
     })
+
 
 def add_category_view(request, shop_id):
     shop = get_object_or_404(Shop, pk=shop_id)
@@ -80,18 +82,32 @@ def delete_menu_category_view(request, shop_id, category_id):
 def update_menu_item_view(request: HttpRequest, shop_id, item_id):
     item = get_object_or_404(MenuItem, id=item_id)
     shop = get_object_or_404(Shop, pk=shop_id)
+
     if request.method == 'POST':
         form = MenuItemForm(request.POST, request.FILES, instance=item)
-
         if form.is_valid():
             updated_item = form.save(commit=False)
-            updated_item.category = item.category 
+            updated_item.category = item.category
+            updated_item.shop = shop  # ✅ again
             updated_item.save()
             return redirect("menu:manage_menu", shop_id=shop_id)
     else:
         form = MenuItemForm(instance=item)
 
-    return render(request, "update_item.html", {'shop':shop, 'item':item, 'form':form})
+    return render(request, "update_item.html", {'shop': shop, 'item': item, 'form': form})
 
 
+def update_menu_category_view(request, shop_id, category_id):
+    category = get_object_or_404(MenuCategory, pk=category_id, shop_id=shop_id)
+
+    if request.method == "POST":
+        new_name = request.POST.get("name", "").strip()
+        if new_name:
+            category.name = new_name
+            category.save()
+            messages.success(request, "Category name updated successfully.")
+        else:
+            messages.error(request, "Category name cannot be empty.")
+
+    return redirect("menu:manage_menu", shop_id=shop_id)
 
