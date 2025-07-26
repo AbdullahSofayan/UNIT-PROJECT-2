@@ -9,7 +9,10 @@ class MenuCategory(models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, related_name="categories")
 
     class Meta:
-        unique_together = ('name', 'shop')  # optional, prevents duplicate categories per shop
+        unique_together = ('name', 'shop') 
+        
+    def __str__(self):
+        return self.name 
 
 
 

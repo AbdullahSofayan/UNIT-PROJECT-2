@@ -2,17 +2,30 @@ from django import forms
 from .models import MenuItem, MenuCategory
 
 class MenuItemForm(forms.ModelForm):
+    category = forms.ModelChoiceField(
+        queryset=MenuCategory.objects.none(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label="Select Category",
+        required=True,
+    )
+
     class Meta:
         model = MenuItem
-        fields = ['name', 'description', 'price', 'calories', 'image']
+        fields = ['name', 'description', 'price', 'calories','category',  'image']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'price': forms.NumberInput(attrs={'class': 'form-control'}),
             'calories': forms.NumberInput(attrs={'class': 'form-control'}),
             'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-
         }
+
+    def __init__(self, *args, **kwargs):
+        shop = kwargs.pop('shop', None)
+        super().__init__(*args, **kwargs)
+        if shop:
+            self.fields['category'].queryset = MenuCategory.objects.filter(shop=shop)
+
 
 class MenuCategoryForm(forms.ModelForm):
     class Meta:

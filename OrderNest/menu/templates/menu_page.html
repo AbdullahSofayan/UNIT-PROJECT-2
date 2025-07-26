@@ -63,9 +63,18 @@
               <div class="card-footer bg-light d-flex justify-content-between align-items-center">
                 <span class="text-success fw-bold">{{ item.price }} SR</span>
                 {% if item.calories %}
-                <span class="text-muted small"><i class="bi bi-fire"></i> {{ item.calories }} cal</span>
+                  <span class="text-muted small"><i class="bi bi-fire"></i> {{ item.calories }} cal</span>
                 {% endif %}
               </div>
+              <div class="p-2 border-top bg-light">
+                <div class="p-2 border-top bg-light">
+                  <form method="post" action="{% url 'orders:add_to_cart' shop.id item.id %}?next=#cat-{{ category.id }}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-warning w-100">Add to Cart</button>
+                  </form>
+                </div>
+              </div>
+
             </div>
           </div>
           {% empty %}
@@ -103,5 +112,7 @@
     color: #000;
   }
 </style>
+
+
 
 {% endblock %}

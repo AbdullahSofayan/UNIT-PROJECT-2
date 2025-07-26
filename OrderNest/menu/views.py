@@ -32,15 +32,15 @@ def add_menu_item_view(request: HttpRequest, shop_id, category_id):
     category = get_object_or_404(MenuCategory, pk=category_id, shop=shop)
 
     if request.method == "POST":
-        form = MenuItemForm(request.POST, request.FILES)
+        form = MenuItemForm(request.POST, request.FILES, shop=shop)
         if form.is_valid():
             item = form.save(commit=False)
             item.category = category
-            item.shop = shop  # ✅ important
+            item.shop = shop 
             item.save()
             return redirect('menu:manage_menu', shop_id=shop.id)
     else:
-        form = MenuItemForm()
+        form = MenuItemForm(shop=shop)
 
     return render(request, 'add_menu_item.html', {
         'form': form,
@@ -84,15 +84,16 @@ def update_menu_item_view(request: HttpRequest, shop_id, item_id):
     shop = get_object_or_404(Shop, pk=shop_id)
 
     if request.method == 'POST':
-        form = MenuItemForm(request.POST, request.FILES, instance=item)
+        form = MenuItemForm(request.POST, request.FILES, instance=item, shop=shop)
         if form.is_valid():
             updated_item = form.save(commit=False)
             updated_item.category = item.category
-            updated_item.shop = shop  # ✅ again
+            updated_item.shop = shop 
             updated_item.save()
             return redirect("menu:manage_menu", shop_id=shop_id)
     else:
-        form = MenuItemForm(instance=item)
+        form = MenuItemForm(instance=item, shop=shop) 
+
 
     return render(request, "update_item.html", {'shop': shop, 'item': item, 'form': form})
 

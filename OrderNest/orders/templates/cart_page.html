@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cart{% endblock %}
+
+{% block nav-elements %}
+  <li><a href="#">My orders</a></li>
+  <li><a href="{% url 'accounts:profile_view' %}">Profile</a></li>
+  <li><a href="{% url 'accounts:logout_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+{% endblock %}
+
+{% block main %}
+<div class="container py-4">
+  <h2 class="mb-4">Your Cart</h2>
+
+  {% if shop_carts %}
+    {% for shop_cart in shop_carts %}
+      <a href="{% url 'menu:menu_view' shop_cart.shop.id %}"><h3 class="mb-3">{{ shop_cart.shop.name }}</h3></a>
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-4">
+        {% for item in shop_cart.items %}
+        <div class="col">
+          <div class="card h-100 shadow-sm">
+            <img src="{% if item.image %}{{ item.image.url }}{% else %}{% static 'menu/images/default.jpeg' %}{% endif %}" 
+                class="card-img-top" alt="{{ item.name }}" style="max-height: 200px; object-fit: contain;">
+            <div class="card-body">
+              <h5 class="card-title">{{ item.name }}</h5>
+              <p class="card-text">
+                <strong>Price:</strong> {{ item.price }} SR<br>
+                <strong>Quantity:</strong> {{ item.quantity }}<br>
+                <strong>Total:</strong> {{ item.total_price }} SR
+                <form action="{% url 'orders:remove_from_cart' shop_cart.shop.id item.id %}" method="POST" class="mt-2">
+                  {% csrf_token %}
+                  <button class="btn btn-sm btn-danger">Remove</button>
+                </form>
+              </p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+          <div class="mt-4 text-end">
+      <h4> Total: <strong>{{ shop_cart.total }} SR</strong></h4>
+    </div>
+      <hr>
+    {% endfor %}
+
+  {% else %}
+    <p>Your cart is empty.</p>
+  {% endif %}
+</div>
+{% endblock %}
