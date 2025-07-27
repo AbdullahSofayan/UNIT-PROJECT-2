@@ -27,4 +27,12 @@ class MenuItem(models.Model):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE)
 
 
+class MenuItemOption(models.Model):
+    category = models.ForeignKey(MenuCategory, on_delete=models.CASCADE, related_name='options', null=True, blank=True)
+    name = models.CharField(max_length=100)
+    extra_price = models.DecimalField(max_digits=6, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.name} (+{self.extra_price} SR)"
+
 

@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpRequest
 from shops.models import Shop
 from .models import MenuCategory
-from .forms import MenuItemForm, MenuCategoryForm, MenuItem
+from .forms import MenuItemForm, MenuCategoryForm, MenuItem, MenuItemOptionForm
 from django.contrib import messages
 
 # Create your views here.
@@ -111,4 +111,20 @@ def update_menu_category_view(request, shop_id, category_id):
             messages.error(request, "Category name cannot be empty.")
 
     return redirect("menu:manage_menu", shop_id=shop_id)
+
+
+def add_option_to_category(request, shop_id, category_id):
+    category = get_object_or_404(MenuCategory, id=category_id)
+    shop = get_object_or_404(Shop, pk=shop_id)
+
+    if request.method == "POST":
+        form = MenuItemOptionForm(request.POST)
+        if form.is_valid():
+            option = form.save(commit=False)
+            option.category = category
+            option.save()
+            return redirect('menu:manage_menu', shop_id=shop_id)
+    else:
+        form = MenuItemOptionForm()
+    return render(request, 'add_option.html', {'form': form, 'category': category, 'shop': shop})
 

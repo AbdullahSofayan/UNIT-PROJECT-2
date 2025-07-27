@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Add Details - {{ category.name }}{% endblock %}
+{% load static %}
+
+{% block nav-elements %}
+    <li><a href="{% url 'shops:shop_details_view' shop.id %}">Shop</a></li>
+    <li><a href="{% url 'accounts:profile_view' %}">Profile</a></li>
+    <li><a href="{% url 'accounts:logout_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+{% endblock %}
+
+{% block main %}
+<div class="container py-4">
+  <div class="col-md-6 mx-auto">
+    <h2 class="mb-4 text-center">Add Details to <a href="{% url 'menu:manage_menu' shop.id %}" style="text-decoration: none; color: #ffca2b;">{{ category.name }}</a></h2>
+
+    <form method="post" class="shadow p-4 rounded bg-light">
+      {% csrf_token %}
+      <div class="mb-3">
+        {{ form.name.label_tag }}
+        {{ form.name }}
+      </div>
+      <div class="mb-3">
+        {{ form.extra_price.label_tag }}
+        {{ form.extra_price }}
+      </div>
+      <button type="submit" class="btn btn-success w-100">Add Option</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

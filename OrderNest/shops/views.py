@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest
 from django.core.paginator import Paginator
 
@@ -95,3 +95,22 @@ def add_branch_view(request: HttpRequest, shop_id):
 
 
     return render(request, 'add_branch.html', {'form': form, 'shop': shop ,'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY})
+
+
+def delete_branch_view(request: HttpRequest, branch_id, shop_id):
+    branch = get_object_or_404(Branch, id=branch_id)
+    branch.delete()
+    return redirect("shops:branches_view", shop_id=shop_id)
+
+
+def edit_branch_view(request, branch_id, shop_id):
+    branch = get_object_or_404(Branch, id=branch_id)
+
+    if request.method == "POST":
+        branch.name = request.POST.get("name")
+        branch.location = request.POST.get("location")
+        branch.save()
+        return redirect("shops:branches_view", shop_id=shop_id)
+
+    # Optional if you want a standalone edit page later
+    return render(request, "shops/edit_branch.html", {"branch": branch, "shop_id": shop_id})

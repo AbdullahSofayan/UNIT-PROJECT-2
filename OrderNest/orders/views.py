@@ -8,25 +8,26 @@ from shops.models import Shop
 def add_to_cart_view(request: HttpRequest, shop_id, item_id):
     if request.method == "POST":
         item = get_object_or_404(MenuItem, id=item_id)
+        quantity = int(request.POST.get("quantity", 1))
 
-        # Initialize 'cart' in session if not present
         cart = request.session.get("cart", {})
-
-        # Use shop_id as a key for a nested cart
         shop_cart = cart.get(str(shop_id), {})
 
         if str(item_id) in shop_cart:
-            shop_cart[str(item_id)] += 1
+            shop_cart[str(item_id)] += quantity
         else:
-            shop_cart[str(item_id)] = 1
+            shop_cart[str(item_id)] = quantity
 
-        # Update cart structure
         cart[str(shop_id)] = shop_cart
         request.session["cart"] = cart
         request.session.modified = True
 
-    return redirect('menu:menu_view', shop_id=shop_id)
-
+    # Redirect to the page the user came from
+    referer = request.META.get("HTTP_REFERER")
+    if referer:
+        return redirect(referer)
+    else:
+        return redirect('menu:menu_view', shop_id=shop_id)
 
 
 
@@ -34,35 +35,37 @@ def add_to_cart_view(request: HttpRequest, shop_id, item_id):
 def cart_view(request: HttpRequest, shop_id):
     cart = request.session.get("cart", {})
     shop_carts = []
+    shop = None  # ✅ Make sure it's always defined
 
-    for shop_id, shop_items in cart.items():
+    shop_cart_data = cart.get(str(shop_id))
+    if shop_cart_data:
         try:
             shop = Shop.objects.get(pk=shop_id)
+            items = []
+            total = 0
+            for item_id, quantity in shop_cart_data.items():
+                try:
+                    item = MenuItem.objects.get(pk=item_id)
+                    item.quantity = quantity
+                    item.total_price = item.price * quantity
+                    items.append(item)
+                    total += item.total_price
+                except MenuItem.DoesNotExist:
+                    continue
+
+            shop_carts.append({
+                "shop": shop,
+                "items": items,
+                "total": total
+            })
         except Shop.DoesNotExist:
-            continue
-
-        items = []
-        total = 0
-        for item_id, quantity in shop_items.items():
-            try:
-                item = MenuItem.objects.get(pk=item_id)
-                item.quantity = quantity
-                item.total_price = item.price * quantity
-                items.append(item)
-                total += item.total_price
-            except MenuItem.DoesNotExist:
-                continue
-
-        shop_carts.append({
-            "shop": shop,
-            "items": items,
-            "total": total
-        })
-        
+            pass
 
     return render(request, "cart_page.html", {
         "shop_carts": shop_carts,
+        "shop": shop,  # ✅ Now safe to access even if None
     })
+
 
 
 
@@ -74,7 +77,10 @@ def remove_from_cart_view(request: HttpRequest, shop_id, item_id):
         shop_cart = cart.get(str(shop_id), {})
 
         if str(item_id) in shop_cart:
-            del shop_cart[str(item_id)]
+            if shop_cart[str(item_id)] > 1:
+                shop_cart[str(item_id)] -= 1  # Decrease quantity by 1
+            else:
+                del shop_cart[str(item_id)]  # Remove if quantity reaches 0
 
         # If the shop_cart is now empty, remove the shop entry
         if shop_cart:
@@ -84,8 +90,8 @@ def remove_from_cart_view(request: HttpRequest, shop_id, item_id):
 
         request.session["cart"] = cart
         request.session.modified = True
-    
 
-    return redirect('cart_view', shop_id=shop_id)
+    return redirect('orders:cart_view', shop_id=shop_id)
+
 
 

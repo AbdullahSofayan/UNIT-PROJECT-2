@@ -27,9 +27,7 @@
           <ul class="nav-links" style="list-style: none;">
             <li><a href="{% if request.session.customer_id %}{% url 'accounts:customer_home_view' %}{% elif request.session.admin_id %}{% url 'shops:shop_admin_dashboard' %}{% else %}{% url 'main:home_view' %}{% endif %}">Home</a></li>
             {% if not request.session.admin_id %} <li><a href="{% if request.session.customer_id %}{% url 'shops:browse_shops_view' %}{% else %}{% url 'accounts:login_view' %}{% endif %}">Browse Shops</a></li>
-              {% if shop %}
-              <li><a href="{% url 'orders:cart_view' shop.id %}">Cart ({{ request.session.cart|length|default:0 }})</a></li>
-              {% endif %}
+            
             {% endif %}
             {% block nav-elements %}
 

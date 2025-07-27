@@ -1,5 +1,5 @@
 from django import forms
-from .models import MenuItem, MenuCategory
+from .models import MenuItem, MenuCategory, MenuItemOption
 
 class MenuItemForm(forms.ModelForm):
     category = forms.ModelChoiceField(
@@ -33,4 +33,21 @@ class MenuCategoryForm(forms.ModelForm):
         fields = ['name']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+
+
+class MenuItemOptionForm(forms.ModelForm):
+    class Meta:
+        model = MenuItemOption
+        fields = ['name', 'extra_price']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Option name (e.g., Add Cheese)'
+            }),
+            'extra_price': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Extra price (e.g., 2.00)'
+            }),
         }

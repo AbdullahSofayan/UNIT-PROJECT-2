@@ -35,8 +35,10 @@
             <div class="btns">
               
             <a href="{% url 'menu:add_menu_item' shop.id category.id %}" class="btn btn-sm btn-success">+ Add Item</a>
-              <!-- ✅ Edit Category Button -->
-              <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editCategoryModal-{{ category.id }}">
+            <a href="{% url 'menu:add_option_to_category' shop.id category.id %}" class="btn btn-sm btn-warning" >+ Details</a>
+
+              
+            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editCategoryModal-{{ category.id }}">
                 Edit Category
               </button>
             <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ category.id }}">
