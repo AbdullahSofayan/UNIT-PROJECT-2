@@ -122,7 +122,18 @@
                 </div>
               </div>
             </div>
-            <div class="modal fade" id="editCategoryModal-{{ category.id }}" tabindex="-1" aria-labelledby="editCategoryModalLabel-{{ category.id }}" aria-hidden="true">
+            
+
+
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+    </div>
+  </div>
+
+              <div class="modal fade" id="editCategoryModal-{{ category.id }}" tabindex="-1" aria-labelledby="editCategoryModalLabel-{{ category.id }}" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <form method="post" action="{% url 'menu:update_menu_category_view' shop.id category.id %}">
@@ -142,14 +153,6 @@
     </div>
   </div>
 </div>
-
-        </div>
-    </div>
-</div>
-{% endfor %}
-
-    </div>
-  </div>
 
 
           <div class="modal fade" id="deleteModal-{{ category.id }}" tabindex="-1" aria-labelledby="deleteModalLabel-{{ category.id }}" aria-hidden="true">
@@ -173,5 +176,12 @@
 
 </div>
 
+<script>
+document.addEventListener('shown.bs.modal', function (event) {
+  const modal = event.target;
+  const input = modal.querySelector('input[name="name"]');
+  if (input) input.focus();
+});
+</script>
 
 {% endblock %}
