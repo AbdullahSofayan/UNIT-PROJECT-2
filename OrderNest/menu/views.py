@@ -1,9 +1,10 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpRequest
 from shops.models import Shop
-from .models import MenuCategory
+from .models import MenuCategory, MenuItemOption
 from .forms import MenuItemForm, MenuCategoryForm, MenuItem, MenuItemOptionForm
 from django.contrib import messages
+from django.views.decorators.http import require_POST
 
 # Create your views here.
 
@@ -28,6 +29,35 @@ def manage_menu_view(request: HttpRequest, shop_id):
         "shop": shop,
         "categories": categories,
     })
+
+
+
+def manage_options_view(request, shop_id, category_id):
+    shop = get_object_or_404(Shop, id=shop_id)
+    category = get_object_or_404(MenuCategory, id=category_id, shop=shop)
+    options = MenuItemOption.objects.filter(category=category)
+
+    return render(request, 'manage_options.html', {
+        'shop': shop,
+        'category': category,
+        'options': options,
+    })
+
+
+@require_POST
+def update_option(request, shop_id, category_id, option_id):
+    option = get_object_or_404(MenuItemOption, id=option_id, category_id=category_id)
+    option.name = request.POST.get("name", option.name)
+    option.extra_price = request.POST.get("extra_price", option.extra_price)
+    option.save()
+    return redirect("menu:manage_menu", shop_id=shop_id)
+
+def delete_option(request, shop_id, category_id, option_id):
+    option = get_object_or_404(MenuItemOption, id=option_id, category_id=category_id)
+    option.delete()
+    return redirect("menu:manage_menu", shop_id=shop_id)
+
+
 
 def add_menu_item_view(request: HttpRequest, shop_id, category_id):
     shop = get_object_or_404(Shop, pk=shop_id)
