@@ -13,6 +13,7 @@ urlpatterns = [
      path('shop/<int:shop_id>/update-item/<int:item_id>/', views.update_menu_item_view, name='update_menu_item_view'),
      path('<int:shop_id>/category/<int:category_id>/edit/', views.update_menu_category_view, name='update_menu_category_view'),
      path('<int:shop_id>/item/<int:category_id>/add-option/', views.add_option_to_category, name='add_option_to_category'),
+    path('shop/<int:shop_id>/item/<int:item_id>/details/', views.item_detail_view, name='item_detail'),
 
 
 

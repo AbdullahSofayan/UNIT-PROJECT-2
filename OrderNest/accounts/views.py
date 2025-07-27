@@ -5,6 +5,7 @@ from django.contrib.auth.hashers import check_password, make_password
 from .models import User
 from .forms import LoginForm, SignUpForm, UpdateProfileForm
 from django.shortcuts import get_object_or_404
+from django.contrib.auth import logout
 
 
 def login_view(request: HttpRequest):
@@ -82,9 +83,16 @@ def sign_up_view(request: HttpRequest):
     return render(request, "sign_up.html", {"form": form, "error_message": error_message})
 
 
-def logout_view(request: HttpRequest):
-    request.session.flush()
-    return redirect("main:home_view")
+def logout_view(request):
+    cart_backup = request.session.get('cart')  # save cart
+    logout(request)
+    request.session.flush() 
+
+    # restore cart after flush (start a new session first)
+    request.session['cart'] = cart_backup
+    request.session.modified = True
+
+    return redirect('main:home_view')  # or wherever you redirect
 
 
 def customer_home_view(request: HttpRequest):

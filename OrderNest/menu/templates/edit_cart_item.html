@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Edit {{ item.name }}{% endblock %}
+{% block main %}
+<div class="container py-4">
+  <h2>Edit {{ item.name }}</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="quantity">Quantity:</label>
+      <input type="number" name="quantity" value="{{ quantity }}" min="1" class="form-control" style="max-width: 100px;">
+    </div>
+
+    <div class="mb-3">
+      <label>Options:</label><br>
+      {% for option in options %}
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="options" value="{{ option.id }}" id="opt{{ option.id }}"
+            {% if option.id|stringformat:"s" in selected_option_ids %}checked{% endif %}>
+          <label class="form-check-label" for="opt{{ option.id }}">
+            {{ option.name }} (+{{ option.extra_price }} SR)
+          </label>
+        </div>
+      {% endfor %}
+    </div>
+
+    <button type="submit" class="btn btn-warning">Update Cart</button>
+    <a href="{% url 'orders:cart_view' shop_id %}" class="btn btn-secondary ms-2">Cancel</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} {{ item.name }} Details {% endblock %}
+
+{% block nav-elements %}
+  <li><a href="#">My orders</a></li>
+  <li><a href="{% url 'accounts:profile_view' %}">Profile</a></li>
+  <li><a href="{% url 'accounts:logout_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+{% endblock %}
+
+{% block main %}
+<div class="container py-4">
+  <h2 class="mb-4 text-center">{{ item.name }}</h2>
+
+  <div class="text-center mb-4">
+    <img src="{% if item.image %}{{ item.image.url }}{% else %}{% static 'menu/images/default.jpeg' %}{% endif %}"
+         class="img-fluid" alt="{{ item.name }}" style="max-height: 300px;">
+  </div>
+
+  <p class="text-muted">{{ item.description }}</p>
+  <p><strong>Price:</strong> {{ item.price }} SR</p>
+  <p><strong>Calories:</strong> {{ item.calories }}</p>
+
+  <form method="post" action="{% url 'orders:add_to_cart' shop_id item.id %}">
+    {% csrf_token %}
+    <input type="hidden" name="quantity" value="1">
+
+    <h4 class="mt-4">Choose Options:</h4>
+    {% if options %}
+      {% for option in options %}
+        <div class="form-check mb-2">
+          <input class="form-check-input" type="checkbox" name="options" value="{{ option.id }}" id="option{{ option.id }}">
+          <label class="form-check-label" for="option{{ option.id }}">
+            {{ option.name }} (+{{ option.extra_price }} SR)
+          </label>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-muted">No options available for this item.</p>
+    {% endif %}
+
+    <button type="submit" class="btn btn-warning mt-3">Add to Cart</button>
+    <a href="{% url 'menu:menu_view' shop_id %}" class="btn btn-secondary mt-3">Back to Menu</a>
+  </form>
+</div>
+{% endblock %}

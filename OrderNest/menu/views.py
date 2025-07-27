@@ -15,6 +15,8 @@ def menu_view(request: HttpRequest, shop_id):
     return render(request, "menu_page.html", {
         "shop": shop,
         "categories": categories,
+        "quantities": range(1, 11)
+
     })
 
 
@@ -128,3 +130,14 @@ def add_option_to_category(request, shop_id, category_id):
         form = MenuItemOptionForm()
     return render(request, 'add_option.html', {'form': form, 'category': category, 'shop': shop})
 
+
+
+def item_detail_view(request, shop_id, item_id):
+    item = get_object_or_404(MenuItem, id=item_id, category__shop_id=shop_id)
+    options = item.category.options.all()
+    
+    return render(request, 'item_details.html', {
+        'item': item,
+        'options': options,
+        'shop_id': shop_id,
+    })

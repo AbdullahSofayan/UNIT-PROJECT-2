@@ -16,13 +16,12 @@
     <h2>{{ shop.name }} Menu</h2>
     <a href="{% url 'orders:cart_view' shop.id %}" class="btn btn-outline-secondary position-relative">
       <i class="bi bi-cart-fill fs-5"></i>
-      {% with count=request.session.cart|get_shop_cart_count:shop.id %}
-        {% if count > 0 %}
-        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-          {{ count }}
-        </span>
-        {% endif %}
-      {% endwith %}
+{% get_shop_cart_count shop.id as count %}
+{% if count > 0 %}
+  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+    {{ count }}
+  </span>
+{% endif %}
     </a>
   </div>
 
@@ -60,9 +59,9 @@
           {% for item in category.items.all %}
           <div class="col">
             <div class="card h-100 shadow-sm">
-              <img src="{% if item.image %}{{ item.image.url }}{% else %}{% static 'menu/images/default.jpeg' %}{% endif %}"
+                <a href="{% url 'menu:item_detail' shop.id item.id %}"><img src="{% if item.image %}{{ item.image.url }}{% else %}{% static 'menu/images/default.jpeg' %}{% endif %}"
                    class="card-img-top"
-                   alt="{{ item.name }}">
+                   alt="{{ item.name }}"></a>
 
               <div class="card-body">
                 <h5 class="card-title">{{ item.name }}</h5>
@@ -81,7 +80,7 @@
                   {% csrf_token %}
                   <div class="d-flex align-items-center gap-2">
                     <select name="quantity" class="form-select form-select-sm" style="width: 60px;">
-                      {% for i in 1|to_range:10 %}
+                      {% for i in quantities %}
                         <option value="{{ i }}">{{ i }}</option>
                       {% endfor %}
                     </select>

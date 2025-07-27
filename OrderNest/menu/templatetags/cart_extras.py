@@ -2,11 +2,24 @@ from django import template
 
 register = template.Library()
 
-@register.filter
-def get_shop_cart_count(cart, shop_id):
-    shop_cart = cart.get(str(shop_id), {}) if cart else {}
-    return sum(shop_cart.values())
+@register.simple_tag(takes_context=True)
+def get_shop_cart_count(context, shop_id):
+    request = context.get("request")
 
-@register.filter
-def to_range(start, end):
-    return range(start, end + 1)
+    if not request or not hasattr(request, "session"):
+        return 0
+
+    cart = request.session.get("cart", {})
+    if not isinstance(cart, dict):
+        return 0
+
+    shop_cart = cart.get(str(shop_id), {})
+    if not isinstance(shop_cart, dict):
+        return 0
+
+    count = 0
+    for item_data in shop_cart.values():
+        if isinstance(item_data, dict):
+            count += item_data.get("quantity", 0)
+
+    return count

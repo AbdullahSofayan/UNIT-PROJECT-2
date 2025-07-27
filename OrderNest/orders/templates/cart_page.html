@@ -11,7 +11,20 @@
 
 {% block main %}
 <div class="container py-4">
-  <h2 class="mb-4" style="margin-bottom: 1rem;">Cart from <a href="{% url 'menu:menu_view' shop.id %}" style="text-decoration: none; color: #ffca2b;">{{shop.name}}</a></h2>
+    {% if shop %}
+    <h2 class="mb-4" style="margin-bottom: 1rem;">
+      Cart from <a href="{% url 'menu:menu_view' shop.id %}" style="text-decoration: none; color: #ffca2b;">{{ shop.name }}</a>
+    </h2>
+  {% else %}
+    <h2 class="mb-4">Your Cart</h2>
+  {% endif %}
+  {% if item.selected_options %}
+    <ul class="small text-muted">
+      {% for opt in item.selected_options %}
+        <li>{{ opt.name }} (+{{ opt.extra_price }} SR)</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
 
   {% if shop_carts %}
     {% for shop_cart in shop_carts %}
@@ -26,19 +39,36 @@
               <p class="card-text">
                 <strong>Price:</strong> {{ item.price }} SR<br>
                 <strong>Total:</strong> {{ item.total_price }} SR
+                    {% if item.selected_options %}
+                      <ul class="small text-muted mt-2 mb-0">
+                        {% for opt in item.selected_options %}
+                          <li>{{ opt.name }} (+{{ opt.extra_price }} SR)</li>
+                        {% endfor %}
+                      </ul>
+                    {% endif %}
+
                 <div class="d-flex align-items-center gap-2 mt-2">
-                  <form action="{% url 'orders:remove_from_cart' shop_cart.shop.id item.id %}" method="POST">
+                  <form action="{% url 'orders:remove_from_cart' shop_cart.shop.id item.cart_key %}" method="POST">
                     {% csrf_token %}
                     <button class="btn btn-sm btn-outline-danger" title="Remove one">−</button>
                   </form>
 
                   <strong>{{ item.quantity }}</strong>
 
-                  <form action="{% url 'orders:add_to_cart' shop_cart.shop.id item.id %}" method="POST">
+                  <form action="{% url 'orders:add_existing_to_cart' shop_cart.shop.id item.cart_key %}" method="POST">
                     {% csrf_token %}
-                    <input type="hidden" name="quantity" value="1">
+                    <input type="hidden" name="from_cart" value="true">
                     <button class="btn btn-sm btn-outline-success" title="Add one">+</button>
                   </form>
+                    <form action="{% url 'orders:delete_from_cart' shop_cart.shop.id item.cart_key %}" method="POST">
+                      {% csrf_token %}
+                      <button class="btn btn-sm btn-outline-dark" title="Remove item"><i class="bi bi-trash"></i></button>
+                    </form>
+                    <form action="{% url 'orders:edit_cart_item' shop_cart.shop.id item.cart_key %}" method="GET">
+                      <button class="btn btn-sm btn-outline-primary" title="Edit options">Edit</button>
+                    </form>
+
+
                 </div>
 
 
@@ -48,9 +78,13 @@
         </div>
         {% endfor %}
       </div>
-          <div class="mt-4 text-end">
-      <h4> Total: <strong>{{ shop_cart.total }} SR</strong></h4>
-    </div>
+      <div class="mt-4 d-flex justify-content-between align-items-center">
+        <h4>Total: <strong>{{ shop_cart.total }} SR</strong></h4>
+        <form action="{% url 'orders:checkout_view' shop_cart.shop.id %}" method="GET">
+          <button class="btn btn-warning btn-lg">Proceed to Checkout</button>
+        </form>
+      </div>
+
       <hr>
     {% endfor %}
 
