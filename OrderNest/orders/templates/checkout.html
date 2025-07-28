@@ -1,13 +1,83 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Checkout{% endblock %}
+
 {% block main %}
-<div class="container py-4">
-  <h2>Checkout</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button class="btn btn-success">Place Order</button>
-    <a href="{% url 'orders:cart_view' shop_id %}" class="btn btn-secondary">Back</a>
-  </form>
+<div class="container py-5">
+  <div class="row">
+    
+    <!-- Cart Summary -->
+    <div class="col-md-5 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          🛒 <strong>Your Cart</strong>
+        </div>
+        <div class="card-body">
+          {% if cart_items %}
+            {% for entry in cart_items %}
+              <div class="mb-3">
+                <strong>{{ entry.item.name }}</strong> × {{ entry.quantity }} <br>
+                {% if entry.options %}
+                  <small class="text-muted">Options:</small>
+                  <ul class="small text-muted">
+                    {% for opt in entry.options %}
+                      <li>{{ opt.name }} (+{{ opt.extra_price }} SR)</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+                <p><strong>{{ entry.subtotal }} SR</strong></p>
+                <hr>
+              </div>
+            {% endfor %}
+            <h5>Total: <strong>{{ total }} SR</strong></h5>
+          {% else %}
+            <p>Your cart is empty.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Info & Address -->
+    <div class="col-md-7">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          🧾 <strong>Order Information</strong>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label class="form-label">Customer Name</label>
+              <input type="text" class="form-control" value="{{ user.full_name }}" readonly>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Phone</label>
+              <input type="text" class="form-control" value="{{ user.phone }}" readonly>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Delivery Address</label>
+              <select name="address_id" class="form-select" required>
+                <option value="">-- Choose Address --</option>
+                {% for address in addresses %}
+                  <option value="{{ address.id }}">{{ address.title }} - {{ address.address }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+              <button type="submit" class="btn btn-success">Place Order</button>
+              <a href="{% url 'orders:cart_view' shop_id %}" class="btn btn-secondary">Back</a>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
 {% endblock %}

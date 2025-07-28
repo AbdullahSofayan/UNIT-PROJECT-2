@@ -32,44 +32,50 @@
         {% for item in shop_cart.items %}
         <div class="col">
           <div class="card h-100 shadow-sm">
-            <img src="{% if item.image %}{{ item.image.url }}{% else %}{% static 'menu/images/default.jpeg' %}{% endif %}" 
-                class="card-img-top" alt="{{ item.name }}" style="max-height: 200px; object-fit: contain;">
-            <div class="card-body">
-              <h5 class="card-title">{{ item.name }}</h5>
-              <p class="card-text">
-                <strong>Price:</strong> {{ item.price }} SR<br>
-                <strong>Total:</strong> {{ item.total_price }} SR
-                    {% if item.selected_options %}
-                      <ul class="small text-muted mt-2 mb-0">
-                        {% for opt in item.selected_options %}
-                          <li>{{ opt.name }} (+{{ opt.extra_price }} SR)</li>
-                        {% endfor %}
-                      </ul>
-                    {% endif %}
+            <img src="{% if item.item.image %}{{ item.item.image.url }}{% else %}{% static 'menu/images/default.jpeg' %}{% endif %}" 
+     class="card-img-top" alt="{{ item.item.name }}" style="max-height: 200px; object-fit: contain;">
 
-                <div class="d-flex align-items-center gap-2 mt-2">
-                  <form action="{% url 'orders:remove_from_cart' shop_cart.shop.id item.cart_key %}" method="POST">
-                    {% csrf_token %}
-                    <button class="btn btn-sm btn-outline-danger" title="Remove one">−</button>
-                  </form>
+<div class="card-body">
+  <h5 class="card-title">{{ item.item.name }}</h5>
+  <p class="card-text">
+    <strong>Price:</strong> {{ item.base_price }} SR<br>
+    <strong>Total:</strong> {{ item.total_price }} SR
 
-                  <strong>{{ item.quantity }}</strong>
+    {% if item.options %}
+      <ul class="small text-muted mt-2 mb-0">
+        {% for opt in item.options %}
+          <li>{{ opt.name }} (+{{ opt.extra_price }} SR)</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
 
-                  <form action="{% url 'orders:add_existing_to_cart' shop_cart.shop.id item.cart_key %}" method="POST">
-                    {% csrf_token %}
-                    <input type="hidden" name="from_cart" value="true">
-                    <button class="btn btn-sm btn-outline-success" title="Add one">+</button>
-                  </form>
-                    <form action="{% url 'orders:delete_from_cart' shop_cart.shop.id item.cart_key %}" method="POST">
-                      {% csrf_token %}
-                      <button class="btn btn-sm btn-outline-dark" title="Remove item"><i class="bi bi-trash"></i></button>
-                    </form>
-                    <form action="{% url 'orders:edit_cart_item' shop_cart.shop.id item.cart_key %}" method="GET">
-                      <button class="btn btn-sm btn-outline-primary" title="Edit options">Edit</button>
-                    </form>
+                        <div class="d-flex align-items-center gap-2 mt-2">
+                          <form action="{% url 'orders:remove_from_cart' shop_cart.shop.id item.id %}" method="POST">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-outline-danger" title="Remove one">−</button>
+                          </form>
+
+                          <strong>{{ item.quantity }}</strong>
+
+                          <form action="{% url 'orders:add_existing_to_cart' shop_cart.shop.id item.id %}" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="from_cart" value="true">
+                            <button class="btn btn-sm btn-outline-success" title="Add one">+</button>
+                          </form>
+
+                          <form action="{% url 'orders:delete_from_cart' shop_cart.shop.id item.id %}" method="POST">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-outline-dark" title="Remove item">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </form>
+
+                          <form action="{% url 'orders:edit_cart_item' shop_cart.shop.id item.id %}" method="GET">
+                            <button class="btn btn-sm btn-outline-primary" title="Edit options">Edit</button>
+                          </form>
+                        </div>
 
 
-                </div>
 
 
               </p>

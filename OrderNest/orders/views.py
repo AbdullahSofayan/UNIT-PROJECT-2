@@ -1,228 +1,154 @@
+from decimal import Decimal
 from django.shortcuts import get_object_or_404, redirect, render
-from orders.models import OrderItem, OrderItemOption
+from orders.models import Cart, CartItem, Order, OrderItem, OrderItemOption
 from menu.models import MenuItem, MenuItemOption
 from django.http import HttpRequest
 from shops.models import Shop 
 from .forms import CheckoutForm
-from accounts.models import User
+from accounts.models import Address, User
+
+def get_or_create_cart(user, shop_id):
+    cart, created = Cart.objects.get_or_create(user=user, shop_id=shop_id)
+    return cart
 
 
 def add_to_cart_view(request: HttpRequest, shop_id, item_id):
+    user_id = request.session.get("customer_id")
+    if not user_id:
+        return redirect("accounts:login_view")
+
+    user = get_object_or_404(User, id=user_id)
     if request.method == "POST":
-        # ✅ Safely get or initialize session cart
-        cart = request.session.get("cart")
-        if not isinstance(cart, dict):
-            cart = {}
+        cart = get_or_create_cart(user=user, shop_id=shop_id)
 
-        shop_cart = cart.get(str(shop_id))
-        if not isinstance(shop_cart, dict):
-            shop_cart = {}
+        item = get_object_or_404(MenuItem, id=item_id)
+        quantity = int(request.POST.get("quantity", 1))
+        option_ids = request.POST.getlist("options")
+        options = []
+        total_price = item.price
 
-        from_cart = request.POST.get("from_cart")
+        for option_id in option_ids:
+            try:
+                option = MenuItemOption.objects.get(id=option_id)
+                total_price += option.extra_price
+                options.append({
+                    "id": option.id,
+                    "name": option.name,
+                    "extra_price": float(option.extra_price)
+                })
+            except MenuItemOption.DoesNotExist:
+                continue
 
-        if from_cart:
-            # 🔁 Reuse existing item in cart (e.g. increasing from cart page)
-            cart_key = str(item_id)
-            matching_keys = [key for key in shop_cart if key.startswith(str(item_id) + "-") or key == str(item_id)]
-            if matching_keys:
-                cart_key = matching_keys[0]
-                shop_cart[cart_key]["quantity"] += 1
+        cart_item = CartItem.objects.create(
+            cart=cart,
+            item=item,
+            quantity=quantity,
+            options=options,
+            base_price=item.price,
+            total_price=total_price * quantity
+        )
 
-                unit_price = shop_cart[cart_key]["base_price"]
-                for opt in shop_cart[cart_key].get("options", []):
-                    unit_price += float(opt.get("extra_price", 0))
-
-                shop_cart[cart_key]["total_price"] += unit_price
-        else:
-            # 🛒 Adding new item from item detail page
-            item = get_object_or_404(MenuItem, id=item_id)
-            quantity = int(request.POST.get("quantity", 1))
-            option_ids = request.POST.getlist("options")
-            options = []
-            total_price = item.price
-
-            for option_id in option_ids:
-                try:
-                    option = MenuItemOption.objects.get(id=option_id)
-                    total_price += option.extra_price
-                    options.append({
-                        "id": option.id,
-                        "name": option.name,
-                        "extra_price": float(option.extra_price)
-                    })
-                except MenuItemOption.DoesNotExist:
-                    continue
-
-            # 🔑 Key includes options so unique combinations are preserved
-            cart_key = f"{item_id}-{'-'.join(option_ids)}" if option_ids else str(item_id)
-
-            if cart_key in shop_cart:
-                shop_cart[cart_key]["quantity"] += quantity
-                shop_cart[cart_key]["total_price"] += total_price
-            else:
-                shop_cart[cart_key] = {
-                    "item_id": item.id,
-                    "quantity": quantity,
-                    "options": options,
-                    "base_price": float(item.price),
-                    "total_price": float(total_price)
-                }
-
-        # ✅ Save updated cart
-        cart[str(shop_id)] = shop_cart
-        request.session["cart"] = cart
-        request.session.modified = True
-
-    # 🔙 Redirect to previous page or fallback
-    return redirect(request.META.get("HTTP_REFERER", '/menu/'))
+    return redirect("menu:menu_view", shop_id=shop_id)
 
 
-def add_existing_to_cart_view(request: HttpRequest, shop_id, cart_key):
+def add_existing_to_cart_view(request: HttpRequest, shop_id, cart_item_id):
+    user_id = request.session.get("customer_id")
+    if not user_id:
+        return redirect("accounts:login_view")
+
+    user = get_object_or_404(User, id=user_id)
+    cart = get_object_or_404(Cart, user=user, shop_id=shop_id)
+    item = get_object_or_404(CartItem, cart=cart, id=cart_item_id)
+
     if request.method == "POST":
-        cart = request.session.get("cart", {})
-        shop_cart = cart.get(str(shop_id), {})
+        # Calculate unit price
+        unit_price = item.base_price
+        for opt in item.options:
+            unit_price += Decimal(str(opt["extra_price"]))
 
-        if cart_key in shop_cart:
-            item_data = shop_cart[cart_key]
-            unit_price = item_data["base_price"]
+        # Update quantity and price
+        item.quantity += 1
+        item.total_price += unit_price
+        item.save()
 
-            for opt in item_data.get("options", []):
-                unit_price += float(opt.get("extra_price", 0))
+    return redirect("orders:cart_view", shop_id=shop_id)
 
-            item_data["quantity"] += 1
-            item_data["total_price"] += unit_price
+from django.views.decorators.http import require_POST
 
-        cart[str(shop_id)] = shop_cart
-        request.session["cart"] = cart
-        request.session.modified = True
+@require_POST
+def delete_from_cart_view(request: HttpRequest, shop_id, item_id):
+    user_id = request.session.get("customer_id")
+    if not user_id:
+        return redirect("accounts:login_view")
+
+    user = get_object_or_404(User, id=user_id)
+    cart = get_object_or_404(Cart, user=user, shop_id=shop_id)
+    item = get_object_or_404(CartItem, cart=cart, id=item_id)
+
+    item.delete()
 
     return redirect('orders:cart_view', shop_id=shop_id)
-
-
-def delete_from_cart_view(request: HttpRequest, shop_id, item_key):
-    if request.method == "POST":
-        cart = request.session.get("cart", {})
-        shop_cart = cart.get(str(shop_id), {})
-
-        if item_key in shop_cart:
-            del shop_cart[item_key]
-
-        if shop_cart:
-            cart[str(shop_id)] = shop_cart
-        else:
-            cart.pop(str(shop_id), None)
-
-        request.session["cart"] = cart
-        request.session.modified = True
-
-    return redirect('orders:cart_view', shop_id=shop_id)
-
-
-
-
 
 
 def cart_view(request: HttpRequest, shop_id):
-    cart = request.session.get("cart", {})
-    shop_carts = []
-    shop = None
+    user_id = request.session.get("customer_id")
+    if not user_id:
+        return redirect("accounts:login_view")
 
-    shop_cart_data = cart.get(str(shop_id))
-    if shop_cart_data:
-        try:
-            shop = Shop.objects.get(pk=shop_id)
-            items = []
-            total = 0
+    user = get_object_or_404(User, id=user_id)
 
-            for key, data in shop_cart_data.items():
-                if isinstance(data, dict):  # New format with options
-                    item = get_object_or_404(MenuItem, id=data["item_id"])
-                    item.quantity = data["quantity"]
-                    item.total_price = data["total_price"]  # already includes options
-                    item.selected_options = data.get("options", [])
-                    item.cart_key = key 
+    cart = Cart.objects.filter(user=user, shop_id=shop_id).first()
+    items = []
+    total = 0
+    shop = get_object_or_404(Shop, id=shop_id)
 
-                    items.append(item)
-                    total += item.total_price
-
-            shop_carts.append({
-                "shop": shop,
-                "items": items,
-                "total": total
-            })
-        except Shop.DoesNotExist:
-            pass
+    if cart:
+        for item in cart.items.all():
+            total += item.total_price
+        items = cart.items.all()
 
     return render(request, "cart_page.html", {
-        "shop_carts": shop_carts,
+        "shop_carts": [{"shop": shop, "items": items, "total": total}],
         "shop": shop,
     })
 
 
+def remove_from_cart_view(request: HttpRequest, shop_id, item_id):  
+    user_id = request.session.get("customer_id")
+    if not user_id:
+        return redirect("accounts:login_view")
 
+    user = get_object_or_404(User, id=user_id)
+    cart = get_object_or_404(Cart, user=user, shop_id=shop_id)
+    item = get_object_or_404(CartItem, cart=cart, id=item_id)
 
-
-
-def remove_from_cart_view(request: HttpRequest, shop_id, item_key):
-    if request.method == "POST":
-        cart = request.session.get("cart", {})
-        shop_cart = cart.get(str(shop_id), {})
-
-        # Match key with or without options
-        matching_keys = [key for key in shop_cart.keys() if key.startswith(str(item_key) + "-") or key == str(item_key)]
-
-        for key in matching_keys:
-            item_data = shop_cart.get(key)
-
-            if isinstance(item_data, dict):
-                if item_data["quantity"] > 1:
-                    # Get the unit price: base + all options
-                    unit_price = item_data["base_price"]
-                    for opt in item_data.get("options", []):
-                        unit_price += float(opt.get("extra_price", 0))
-
-                    # Decrease quantity and adjust total
-                    item_data["quantity"] -= 1
-                    item_data["total_price"] -= unit_price
-                else:
-                    del shop_cart[key]
-                break
-
-        # Remove shop entry if empty
-        if shop_cart:
-            cart[str(shop_id)] = shop_cart
-        else:
-            cart.pop(str(shop_id), None)
-
-        request.session["cart"] = cart
-        request.session.modified = True
+    if item.quantity > 1:
+        item.quantity -= 1
+        item.total_price -= item.base_price + sum(Decimal(str(opt["extra_price"])) for opt in item.options)
+        item.save()
+    else:
+        item.delete()
 
     return redirect('orders:cart_view', shop_id=shop_id)
 
 
 
+def edit_cart_item_view(request, shop_id, item_id):
+    user_id = request.session.get("customer_id")
+    if not user_id:
+        return redirect("accounts:login_view")
 
-
-
-def edit_cart_item_view(request, shop_id, cart_key):
-    cart = request.session.get("cart", {})
-    shop_cart = cart.get(str(shop_id), {})
-    item_data = shop_cart.get(cart_key)
-
-    if not item_data:
-        return redirect('orders:cart_view', shop_id=shop_id)
-
-    item = get_object_or_404(MenuItem, id=item_data["item_id"])
-    all_options = MenuItemOption.objects.filter(category=item.category)
-
+    user = get_object_or_404(User, id=user_id)
+    cart = get_object_or_404(Cart, user=user, shop_id=shop_id)
+    item = get_object_or_404(CartItem, cart=cart, id=item_id)
+    all_options = MenuItemOption.objects.filter(category=item.item.category)
 
     if request.method == "POST":
-        # Get new option IDs and quantity
         option_ids = request.POST.getlist("options")
         quantity = int(request.POST.get("quantity", 1))
 
         options = []
-        total_price = item.price
+        total_price = item.item.price
 
         for option_id in option_ids:
             try:
@@ -236,99 +162,84 @@ def edit_cart_item_view(request, shop_id, cart_key):
             except MenuItemOption.DoesNotExist:
                 continue
 
-        new_cart_key = f"{item.id}-{'-'.join(option_ids)}" if option_ids else str(item.id)
-
-        # Remove old entry
-        if cart_key in shop_cart:
-            del shop_cart[cart_key]
-
-        # Update with new values
-        shop_cart[new_cart_key] = {
-            "item_id": item.id,
-            "quantity": quantity,
-            "options": options,
-            "base_price": float(item.price),
-            "total_price": float(total_price * quantity),
-        }
-
-        cart[str(shop_id)] = shop_cart
-        request.session["cart"] = cart
-        request.session.modified = True
+        item.quantity = quantity
+        item.options = options
+        item.base_price = item.item.price
+        item.total_price = total_price * quantity
+        item.save()
 
         return redirect("orders:cart_view", shop_id=shop_id)
 
-    selected_option_ids = [str(opt["id"]) for opt in item_data.get("options", [])]
+    selected_option_ids = [str(opt["id"]) for opt in item.options]
 
     return render(request, "edit_cart_item.html", {
         "shop_id": shop_id,
-        "cart_key": cart_key,
-        "item": item,
+        "item": item.item,
+        "item_id": item.id,
         "options": all_options,
         "selected_option_ids": selected_option_ids,
-        "quantity": item_data.get("quantity", 1),
+        "quantity": item.quantity,
     })
+
 
 
 def checkout_view(request, shop_id):
-    customer_id = request.session.get("customer_id")
-    if not customer_id:
+    user_id = request.session.get("customer_id")
+    if not user_id:
         return redirect("accounts:login_view")
 
-    customer = get_object_or_404(User, id=customer_id)
+    user = get_object_or_404(User, id=user_id)
+    addresses = user.addresses.all()
 
-    cart = request.session.get("cart", {})
-    shop_cart = cart.get(str(shop_id), {})
-    shop = get_object_or_404(Shop, id=shop_id)
+    cart = Cart.objects.filter(user=user, shop_id=shop_id).first()
+    if not cart:
+        return redirect("orders:cart_view", shop_id=shop_id)
+
+    cart_items = []
+    total = 0
+
+    for item in cart.items.all():
+        subtotal = item.total_price
+        total += subtotal
+        item.subtotal = subtotal  
+        cart_items.append(item)
 
     if request.method == "POST":
-        form = CheckoutForm(request.POST)
-        if form.is_valid():
-            order = form.save(commit=False)
-            order.customer = customer  # استخدم العميل من الجلسة
-            order.shop = shop
+        address_id = request.POST.get("address_id")
+        address = get_object_or_404(Address, id=address_id, user=user)
 
-            # ✅ حساب السعر الكلي
-            total = sum(item["total_price"] for item in shop_cart.values())
-            order.total = total
-            order.save()
+        order = Order.objects.create(
+            customer=user,
+            shop_id=shop_id,
+            address=address,
+            total=total,
+        )
 
-            # 🛒 حفظ عناصر الطلب
-            for cart_key, item_data in shop_cart.items():
-                item = MenuItem.objects.get(id=item_data["item_id"])
-                order_item = OrderItem.objects.create(
-                    order=order,
-                    item=item,
-                    quantity=item_data["quantity"],
-                    base_price=item_data["base_price"],
-                    total_price=item_data["total_price"]
+        for entry in cart_items:
+            order_item = OrderItem.objects.create(
+                order=order,
+                item=entry.item,
+                quantity=entry.quantity,
+                base_price=entry.base_price,
+            )
+            for opt in entry.options:
+                OrderItemOption.objects.create(
+                    order_item=order_item,
+                    name=opt["name"],
+                    extra_price=opt["extra_price"],
                 )
 
-                for opt in item_data.get("options", []):
-                    try:
-                        option_obj = MenuItemOption.objects.get(id=opt["id"])
-                        OrderItemOption.objects.create(
-                            order_item=order_item,
-                            option=option_obj,
-                            extra_price=opt["extra_price"]
-                        )
-                    except MenuItemOption.DoesNotExist:
-                        continue
-
-            # 🧹 حذف السلة
-            del cart[str(shop_id)]
-            request.session["cart"] = cart
-            request.session.modified = True
-
-            return redirect("orders:order_success", order_id=order.id)  # تأكد أن لديك هذا الرابط
-    else:
-        form = CheckoutForm()
+        cart.delete()  # clear cart after order
+        return redirect("orders:order_success", order_id=order.id)
 
     return render(request, "checkout.html", {
-        "form": form,
-        "shop": shop,
-        "shop_id": shop_id
+        "user": user,
+        "cart_items": cart_items,
+        "total": total,
+        "addresses": addresses,
+        "shop_id": shop_id,
     })
+
 
 def order_success(request, order_id):
     return render(request, 'success.html', {"order_id": order_id})
-

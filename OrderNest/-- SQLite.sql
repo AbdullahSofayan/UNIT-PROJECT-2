@@ -213,3 +213,4 @@ VALUES
 
 UPDATE menu_menuitem SET category_id = 25 WHERE category_id = 29;
 
+DELETE from orders_orderitemoption

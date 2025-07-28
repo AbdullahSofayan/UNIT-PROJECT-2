@@ -2,10 +2,14 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.http import HttpRequest
 from django.contrib.auth.hashers import check_password, make_password
-from .models import User
+
+from OrderNest import settings
+from .models import User, Address
 from .forms import LoginForm, SignUpForm, UpdateProfileForm
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 
 def login_view(request: HttpRequest):
@@ -122,7 +126,7 @@ def profile_view(request):
         return redirect('accounts:login_view')
 
     user = get_object_or_404(User, pk=user_id)
-    return render(request, "profile.html", {"user": user})
+    return render(request, "profile.html", {"user": user, "google_maps_api_key": settings.GOOGLE_MAPS_API_KEY})
 
 
 def update_profile_view(request:HttpRequest):
@@ -169,3 +173,53 @@ def reset_password_view(request:HttpRequest):
             messages.success(request, "Password updated successfully.")
         return redirect("accounts:update_profile_view")
 
+@require_POST
+def add_address_view(request):
+    user_id = request.session.get('customer_id') or request.session.get('admin_id')
+    if not user_id:
+        return redirect("accounts:login_view")
+
+    user = get_object_or_404(User, pk=user_id)
+
+    lat = request.POST.get("latitude")
+    lng = request.POST.get("longitude")
+    if not lat or not lng:
+        messages.error(request, "Please select a location on the map before saving the address.")
+        return redirect("accounts:profile_view")
+
+    Address.objects.create(
+        user=user,
+        title=request.POST.get("title", ""),
+        address=request.POST.get("address"),
+        latitude=float(lat),
+        longitude=float(lng),
+    )
+    messages.success(request, "Address added successfully.")
+    return redirect("accounts:profile_view")
+
+@require_POST
+def delete_address_view(request, address_id):
+    user_id = request.session.get('customer_id') or request.session.get('admin_id')
+    address = get_object_or_404(Address, id=address_id, user_id=user_id)
+    address.delete()
+    messages.success(request, "Address deleted successfully.")
+    return redirect("accounts:profile_view")
+
+@require_POST
+def update_address_view(request, address_id):
+    user_id = request.session.get('customer_id') or request.session.get('admin_id')
+    address = get_object_or_404(Address, id=address_id, user_id=user_id)
+
+    lat = request.POST.get("latitude")
+    lng = request.POST.get("longitude")
+    if not lat or not lng:
+        messages.error(request, "Please select a location on the map.")
+        return redirect("accounts:profile_view")
+
+    address.title = request.POST.get("title", "")
+    address.address = request.POST.get("address")
+    address.latitude = float(lat)
+    address.longitude = float(lng)
+    address.save()
+    messages.success(request, "Address updated successfully.")
+    return redirect("accounts:profile_view")

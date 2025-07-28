@@ -37,9 +37,96 @@
           <li class="list-group-item bg-light">
             <strong>Phone:</strong> {{ user.phone }}
           </li>
-          <li class="list-group-item bg-light">
-            <strong>Address:</strong> {{ user.address|default:"—" }}
-          </li>
+
+          <div class="card border-0 shadow rounded-4 p-4 bg-light mt-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="mb-0">📍 Addresses</h5>
+              <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                ➕ Add Address
+              </button>
+            </div>
+
+            {% if user.addresses.all %}
+              <ul class="list-group list-group-flush">
+                {% for addr in user.addresses.all %}
+
+                <li class="list-group-item bg-light">
+                    {{ addr.title|default:"Unnamed" }} – {{ addr.address }}
+                    <small class="text-muted d-block">Lat: {{ addr.latitude }}, Lng: {{ addr.longitude }}</small>
+
+                    <div class="d-flex mt-2 gap-2">
+                      <!-- Edit -->
+                      <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ addr.id }}">
+                        ✏️ Edit
+                      </button>
+
+                      <!-- Delete -->
+                      <form action="{% url 'accounts:delete_address' addr.id %}" method="post">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-outline-danger" type="submit">🗑️ Delete</button>
+                      </form>
+                    </div>
+                  </li>
+
+                  <!-- Edit Modal -->
+                  <div class="modal fade" id="editModal{{ addr.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                      <div class="modal-content">
+                        <form method="post" action="{% url 'accounts:update_address' addr.id %}">
+                          {% csrf_token %}
+                          <div class="modal-header">
+                            <h5 class="modal-title">Edit Address</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                          </div>
+                          <div class="modal-body">
+                            <input type="text" name="title" class="form-control mb-2" value="{{ addr.title }}" placeholder="Title">
+                            <input type="text" id="editAddressInput{{ addr.id }}" name="address" class="form-control mb-2" value="{{ addr.address }}" required readonly>
+                            <div id="editMap{{ addr.id }}" style="height: 300px;" class="rounded mb-2"></div>
+                            <input type="hidden" id="editLatInput{{ addr.id }}" name="latitude" value="{{ addr.latitude }}">
+                            <input type="hidden" id="editLngInput{{ addr.id }}" name="longitude" value="{{ addr.longitude }}">
+                          </div>
+                          <div class="modal-footer">
+                            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button class="btn btn-primary" type="submit">Save Changes</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="text-muted">No saved addresses.</p>
+            {% endif %}
+          </div>
+
+  <!-- Add Address Modal -->
+  <div class="modal fade" id="addAddressModal" tabindex="-1" aria-labelledby="addAddressLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <form method="post" action="{% url 'accounts:add_address' %}">
+          {% csrf_token %}
+          <div class="modal-header">
+            <h5 class="modal-title">Add New Address</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="text" name="title" class="form-control mb-2" placeholder="Address title (e.g., Home, Office)" required>
+            <input type="text" id="addressInput" name="address" class="form-control mb-2" placeholder="Full address" required readonly>
+            <div id="map" style="height: 300px;" class="rounded"></div>
+            <input type="hidden" id="latInput" name="latitude">
+            <input type="hidden" id="lngInput" name="longitude">
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button class="btn btn-primary" type="submit" id="saveBtn" disabled>Save Address</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
           <li class="list-group-item bg-light">
             <strong>Joined:</strong> {{ user.created_at }}
           </li>
@@ -61,4 +148,110 @@
     font-weight: 600;
   }
 </style>
+
+<script>
+  let map, marker;
+  function initMap() {
+    map = new google.maps.Map(document.getElementById("map"), {
+      center: { lat: 24.7136, lng: 46.6753 }, // Default to Riyadh
+      zoom: 12,
+    });
+
+    map.addListener("click", function (e) {
+      const lat = e.latLng.lat();
+      const lng = e.latLng.lng();
+
+      document.getElementById("latInput").value = lat;
+      document.getElementById("lngInput").value = lng;
+
+      if (marker) {
+        marker.setPosition(e.latLng);
+      } else {
+        marker = new google.maps.Marker({
+          position: e.latLng,
+          map: map,
+        });
+      }
+
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ location: e.latLng }, (results, status) => {
+        if (status === "OK" && results[0]) {
+          document.getElementById("addressInput").value = results[0].formatted_address;
+        }
+      });
+    });
+  }
+  function initMap() {
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: 24.7136, lng: 46.6753 },
+    zoom: 12,
+  });
+
+  map.addListener("click", function (e) {
+    const lat = e.latLng.lat();
+    const lng = e.latLng.lng();
+
+    document.getElementById("latInput").value = lat;
+    document.getElementById("lngInput").value = lng;
+
+    if (marker) {
+      marker.setPosition(e.latLng);
+    } else {
+      marker = new google.maps.Marker({
+        position: e.latLng,
+        map: map,
+      });
+    }
+
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ location: e.latLng }, (results, status) => {
+      if (status === "OK" && results[0]) {
+        document.getElementById("addressInput").value = results[0].formatted_address;
+        document.getElementById("saveBtn").disabled = false;  // enable save
+      }
+    });
+  });
+}
+  {% for addr in user.addresses.all %}
+    function initEditMap{{ addr.id }}() {
+      const lat = parseFloat("{{ addr.latitude }}");
+      const lng = parseFloat("{{ addr.longitude }}");
+      const map = new google.maps.Map(document.getElementById("editMap{{ addr.id }}"), {
+        center: { lat: lat, lng: lng },
+        zoom: 12,
+      });
+
+      let marker = new google.maps.Marker({
+        position: { lat: lat, lng: lng },
+        map: map,
+      });
+
+      map.addListener("click", function (e) {
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
+        document.getElementById("editLatInput{{ addr.id }}").value = lat;
+        document.getElementById("editLngInput{{ addr.id }}").value = lng;
+        marker.setPosition(e.latLng);
+
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: e.latLng }, (results, status) => {
+          if (status === "OK" && results[0]) {
+            document.getElementById("editAddressInput{{ addr.id }}").value = results[0].formatted_address;
+          }
+        });
+      });
+    }
+  {% endfor %}
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap" async defer></script>
+<!-- trigger init for edit maps -->
+<script>
+  {% for addr in user.addresses.all %}
+    const editModal{{ addr.id }} = document.getElementById('editModal{{ addr.id }}');
+    editModal{{ addr.id }}.addEventListener('shown.bs.modal', function () {
+      initEditMap{{ addr.id }}();
+    });
+  {% endfor %}
+</script>
 {% endblock %}

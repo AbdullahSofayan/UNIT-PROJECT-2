@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import User
+from .models import User, Address
 
 class LoginForm(forms.Form):
     
@@ -56,4 +56,7 @@ class UpdateProfileForm(forms.ModelForm):
             'address':forms.TextInput(attrs={'class': 'form-control','placeholder': 'Address'})
         }
 
-
+class AddressForm(forms.ModelForm):
+    class Meta:
+        model = Address
+        fields = ['title', 'address', 'latitude', 'longitude']
