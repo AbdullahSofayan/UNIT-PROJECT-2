@@ -11,14 +11,27 @@ class Order(models.Model):
         (PICKUP, 'Pickup')
     ]
 
-    customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
-    address = models.ForeignKey(Address, on_delete=models.PROTECT, related_name="orders")
+    PENDING = 'pending'
+    CONFIRMED = 'confirmed'
+    COMPLETED = 'completed'
+    CANCELLED = 'cancelled'
+    STATUS_CHOICES = [
+        (PENDING, 'Pending'),
+        (CONFIRMED, 'Confirmed'),
+        (COMPLETED, 'Completed'),
+        (CANCELLED, 'Cancelled'),
+    ]
+
+    customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders", null=True, blank=True)
+    address = models.ForeignKey(Address, on_delete=models.PROTECT, related_name="orders", null=True, blank=True)
 
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE)
+    # if method is pickup
     branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
     customer_name = models.CharField(max_length=100)
     phone = models.CharField(max_length=20)
     method = models.CharField(max_length=10, choices=METHOD_CHOICES)
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default=PENDING)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -47,3 +60,12 @@ class CartItem(models.Model):
     options = models.JSONField(default=list)
     base_price = models.DecimalField(max_digits=10, decimal_places=2)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    @property
+    def subtotal(self):
+        return self.base_price * self.quantity  
+
+class Payment(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="payment")
+    method = models.CharField(max_length=50)  # e.g., credit card, cash
+    paid = models.BooleanField(default=False)
+    payment_date = models.DateTimeField(auto_now_add=True)

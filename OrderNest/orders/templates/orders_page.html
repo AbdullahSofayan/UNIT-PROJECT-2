@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Orders{% endblock %}
+
+{% block nav-elements %}
+    <li><a href="{% url 'orders:my_orders' %}">My orders</a></li>
+  <li><a href="{% url 'accounts:profile_view' %}">Profile</a></li>
+  <li><a href="{% url 'accounts:logout_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+{% endblock %}
+
+{% block main %}
+<div class="container py-5">
+  <h2 class="mb-4">🧾 My Orders</h2>
+
+  {% if orders %}
+    <div class="row row-cols-1 g-4">
+      {% for order in orders %}
+      <div class="col">
+
+        <div class="card shadow-sm border-{{ order.status|lower }}">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>#{{ order.id }}</strong>
+
+                <span class="badge status-badge {{ order.status|lower }}">
+                {{ order.get_status_display|default:order.status }}
+                </span>
+          </div>
+          <div class="card-body">
+            <p><strong>Method:</strong> {{ order.method|title }}</p>
+            <p><strong>Created:</strong> {{ order.created_at|date:"M d, Y H:i" }}</p>
+
+            {% if order.method == 'delivery' %}
+              <p><strong>Address:</strong> {{ order.address.title }} - {{ order.address.address }}</p>
+            {% else %}
+              <p><strong>Branch:</strong> {{ order.branch.name }}</p>
+            {% endif %}
+
+            <ul class="list-group list-group-flush mb-3">
+              {% for item in order.items.all %}
+              <li class="list-group-item">
+                {{ item.item.name }} × {{ item.quantity }}
+                {% if item.options.exists %}
+                  <ul class="small text-muted mt-1">
+                    {% for opt in item.options.all %}
+                      <li>{{ opt.option.name }} (+{{ opt.extra_price }} SR)</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </li>
+              {% endfor %}
+            </ul>
+
+            <h5 class="text-end">Total: <strong>{{ order.total }} SR</strong></h5>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info">You haven’t placed any orders yet.</div>
+  {% endif %}
+</div>
+
+<style>
+  .border-pending { border-left: 4px solid #ffc107; }
+  .border-confirmed { border-left: 4px solid #0d6efd; }
+  .border-completed { border-left: 4px solid #198754; }
+  .border-cancelled { border-left: 4px solid #dc3545; }
+  .status-badge {
+    color: white;
+    padding: 0.4em 0.6em;
+    font-size: 0.875rem;
+    border-radius: 0.35rem;
+  }
+
+  .pending {
+    background-color: #ffc107; 
+  }
+
+  .confirmed {
+    background-color: #0d6efd; 
+  }
+
+  .completed {
+    background-color: #198754; 
+  }
+
+  .cancelled {
+    background-color: #dc3545; 
+  }
+</style>
+{% endblock %}

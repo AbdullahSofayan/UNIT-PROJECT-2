@@ -4,7 +4,7 @@
 {% block title %} {{ item.name }} Details {% endblock %}
 
 {% block nav-elements %}
-  <li><a href="#">My orders</a></li>
+    <li><a href="{% url 'orders:my_orders' %}">My orders</a></li>
   <li><a href="{% url 'accounts:profile_view' %}">Profile</a></li>
   <li><a href="{% url 'accounts:logout_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
 {% endblock %}

@@ -3,10 +3,16 @@
 
 {% block title %}Checkout{% endblock %}
 
+{% block nav-elements %}
+  <li><a href="{% url 'orders:my_orders' %}">My Orders</a></li>
+  <li><a href="{% url 'accounts:profile_view' %}">Profile</a></li>
+  <li><a href="{% url 'accounts:logout_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+{% endblock %}
+
 {% block main %}
 <div class="container py-5">
   <div class="row">
-    
+
     <!-- Cart Summary -->
     <div class="col-md-5 mb-4">
       <div class="card shadow-sm">
@@ -38,16 +44,14 @@
       </div>
     </div>
 
-    <!-- Customer Info & Address -->
+    <!-- Order Information -->
     <div class="col-md-7">
       <div class="card shadow-sm">
-        <div class="card-header">
-          🧾 <strong>Order Information</strong>
-        </div>
+        <div class="card-header">🧾 <strong>Order Information</strong></div>
         <div class="card-body">
-          <form method="post">
+          <form method="post" action="{% url 'orders:checkout_view' shop_id %}">
             {% csrf_token %}
-            
+
             <div class="mb-3">
               <label class="form-label">Customer Name</label>
               <input type="text" class="form-control" value="{{ user.full_name }}" readonly>
@@ -59,20 +63,45 @@
             </div>
 
             <div class="mb-3">
+              <label class="form-label">Choose Method</label>
+              <select name="method" id="method-select" class="form-select" required>
+                <option value="">-- Select --</option>
+                <option value="delivery">Delivery</option>
+                <option value="pickup">Pickup</option>
+              </select>
+            </div>
+
+            <!-- Delivery address -->
+            <div id="delivery-fields" class="d-none">
               <label class="form-label">Delivery Address</label>
-              <select name="address_id" class="form-select" required>
-                <option value="">-- Choose Address --</option>
+              <select name="address_id" id="address-select" class="form-select">
                 {% for address in addresses %}
                   <option value="{{ address.id }}">{{ address.title }} - {{ address.address }}</option>
                 {% endfor %}
               </select>
             </div>
 
-            <div class="d-flex gap-2 mt-4">
+            <!-- Pickup branches -->
+            <div id="pickup-fields" class="d-none">
+              <label class="form-label mb-2">Choose a Branch</label>
+              <div class="row row-cols-1 row-cols-md-2 g-3">
+                {% for branch in branches %}
+                <div class="col">
+                  <label class="card shadow-sm p-3 h-100 branch-card" style="cursor:pointer;">
+                    <input type="radio" name="branch_id" value="{{ branch.id }}" class="btn-check" autocomplete="off" required hidden>
+                    <h5>{{ branch.name }}</h5>
+                    <p><strong>Location:</strong> {{ branch.location }}</p>
+                    <a href="https://www.google.com/maps?q={{ branch.latitude }},{{ branch.longitude }}" target="_blank" class="btn btn-outline-primary mt-2">Go to the Branch</a>
+                  </label>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4 mb-2">
               <button type="submit" class="btn btn-success">Place Order</button>
               <a href="{% url 'orders:cart_view' shop_id %}" class="btn btn-secondary">Back</a>
             </div>
-
           </form>
         </div>
       </div>
@@ -80,4 +109,96 @@
 
   </div>
 </div>
+
+<!-- Order Success Modal -->
+{% if order_success %}
+<div class="modal fade" id="orderSuccessModal" tabindex="-1" aria-labelledby="orderSuccessModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title w-100">🎉 Order Placed!</h5>
+      </div>
+      <div class="modal-body">
+        <p>Thank you for your order. Your food is cooking!</p>
+        <a href="{% url 'orders:my_orders' %}" class="btn btn-outline-success mt-2">Go to My Orders</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const orderModal = new bootstrap.Modal(document.getElementById('orderSuccessModal'));
+  window.addEventListener("DOMContentLoaded", () => {
+    orderModal.show();
+  });
+</script>
+{% endif %}
+
+<!-- JS -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const methodSelect = document.getElementById("method-select");
+  const deliveryFields = document.getElementById("delivery-fields");
+  const pickupFields = document.getElementById("pickup-fields");
+  const addressSelect = document.getElementById("address-select");
+  const form = document.querySelector("form");
+
+  methodSelect.addEventListener("change", function () {
+    if (this.value === "delivery") {
+      deliveryFields.classList.remove("d-none");
+      pickupFields.classList.add("d-none");
+      addressSelect.disabled = false;  
+
+    } else if (this.value === "pickup") {
+      pickupFields.classList.remove("d-none");
+      deliveryFields.classList.add("d-none");
+      addressSelect.disabled = true;
+    } else {
+      deliveryFields.classList.add("d-none");
+      pickupFields.classList.add("d-none");
+      addressSelect.disabled = true;
+    }
+  });
+
+  const cards = document.querySelectorAll(".branch-card");
+  cards.forEach(card => {
+    const input = card.querySelector("input[type='radio']");
+    card.addEventListener("click", () => {
+      cards.forEach(c => c.classList.remove("border-primary", "border-3", "shadow"));
+      card.classList.add("border-primary", "border-3", "shadow");
+      input.checked = true;
+    });
+  });
+
+  form.addEventListener("submit", function (e) {
+    const method = methodSelect.value;
+    if (!method) {
+      alert("Please select a method.");
+      e.preventDefault();
+      return;
+    }
+
+    if (method === "delivery" && !addressSelect.value) {
+      alert("Please select a delivery address.");
+      e.preventDefault();
+    }
+
+    if (method === "pickup") {
+      const branchSelected = document.querySelector("input[name='branch_id']:checked");
+      if (!branchSelected) {
+        alert("Please select a branch.");
+        e.preventDefault();
+      }
+    }
+  });
+
+  methodSelect.dispatchEvent(new Event("change"));
+});
+
+</script>
+
+<style>
+  .branch-card {
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+</style>
 {% endblock %}

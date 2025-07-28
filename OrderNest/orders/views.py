@@ -1,9 +1,10 @@
 from decimal import Decimal
+from pyexpat.errors import messages
 from django.shortcuts import get_object_or_404, redirect, render
 from orders.models import Cart, CartItem, Order, OrderItem, OrderItemOption
 from menu.models import MenuItem, MenuItemOption
 from django.http import HttpRequest
-from shops.models import Shop 
+from shops.models import Branch, Shop 
 from .forms import CheckoutForm
 from accounts.models import Address, User
 
@@ -184,36 +185,64 @@ def edit_cart_item_view(request, shop_id, item_id):
 
 
 def checkout_view(request, shop_id):
+
     user_id = request.session.get("customer_id")
     if not user_id:
         return redirect("accounts:login_view")
 
     user = get_object_or_404(User, id=user_id)
     addresses = user.addresses.all()
+    branches = Branch.objects.filter(shop_id=shop_id)
 
     cart = Cart.objects.filter(user=user, shop_id=shop_id).first()
     if not cart:
         return redirect("orders:cart_view", shop_id=shop_id)
 
-    cart_items = []
-    total = 0
+    cart_items = cart.items.all()
+    total = sum(item.total_price for item in cart_items)
 
-    for item in cart.items.all():
-        subtotal = item.total_price
-        total += subtotal
-        item.subtotal = subtotal  
-        cart_items.append(item)
+    if request.method == 'POST':
+        print("check post")
 
-    if request.method == "POST":
-        address_id = request.POST.get("address_id")
-        address = get_object_or_404(Address, id=address_id, user=user)
+        print("post")
+        method = request.POST.get('method')
+        address_id = request.POST.get('address_id')
+        branch_id = request.POST.get('branch_id')
+        print("METHOD:", method)
+        print("ADDRESS_ID:", address_id)
+        print("BRANCH_ID:", branch_id)
+        if method == 'delivery':
+            if not address_id:
+                messages.error(request, "Please select a delivery address.")
+                return redirect('orders:checkout', shop_id=shop_id)
+            address = get_object_or_404(Address, id=address_id, user=user)  
+            branch = None
+        elif method == 'pickup':
+            if not branch_id:
+                messages.error(request, "Please choose a branch.")
+                return redirect('orders:checkout', shop_id=shop_id)
+            branch = get_object_or_404(Branch, id=branch_id, shop_id=shop_id)
+            address = None
+        else:
+            messages.error(request, "Please select a delivery method.")
+            return redirect('orders:checkout', shop_id=shop_id)
+
+
+
+        branch = get_object_or_404(Branch, id=branch_id) if method == "pickup" else None
 
         order = Order.objects.create(
             customer=user,
-            shop_id=shop_id,
             address=address,
+            shop_id=shop_id,
+            branch=branch,
+            method=method,
+            customer_name=user.full_name,
+            phone=user.phone,
             total=total,
         )
+
+
 
         for entry in cart_items:
             order_item = OrderItem.objects.create(
@@ -221,25 +250,49 @@ def checkout_view(request, shop_id):
                 item=entry.item,
                 quantity=entry.quantity,
                 base_price=entry.base_price,
+                total_price = entry.total_price
             )
             for opt in entry.options:
+                option_obj = MenuItemOption.objects.get(id=opt["id"])  
                 OrderItemOption.objects.create(
                     order_item=order_item,
-                    name=opt["name"],
+                    option=option_obj,
                     extra_price=opt["extra_price"],
                 )
 
-        cart.delete()  # clear cart after order
-        return redirect("orders:order_success", order_id=order.id)
+        cart.delete()
+        return render(request, "checkout.html", {
+            "user": user,
+            "cart_items": [],
+            "total": 0,
+            "addresses": addresses,
+            "branches": branches,
+            "shop_id": shop_id,
+            "order_success": True,
+        })
+
 
     return render(request, "checkout.html", {
         "user": user,
         "cart_items": cart_items,
         "total": total,
         "addresses": addresses,
+        "branches": branches,
         "shop_id": shop_id,
     })
 
 
-def order_success(request, order_id):
-    return render(request, 'success.html', {"order_id": order_id})
+
+
+def my_orders_view(request):
+    user_id = request.session.get("customer_id")
+    if not user_id:
+        return redirect("accounts:login_view")
+
+    user = get_object_or_404(User, id=user_id)
+    orders = Order.objects.filter(customer=user).order_by("-created_at").prefetch_related("items__options", "items__item", "address", "branch")
+
+    return render(request, "orders_page.html", {
+        "orders": orders
+    })
+
