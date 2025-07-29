@@ -19,3 +19,4 @@ A Django-based web application that allows users to browse restaurants,coffes, v
 - note: to login as shop admin, username: shop name, password: admin
 ---
 
+- user stories: https://github.com/AbdullahSofayan/UNIT-PROJECT-2/blob/main/user_stories.pdf
