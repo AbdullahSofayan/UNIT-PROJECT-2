@@ -16,6 +16,6 @@ A Django-based web application that allows users to browse restaurants,coffes, v
 - Order status tracking and payment method selection (cash/credit)
 - Admin dashboard for managing shops and orders
 - Responsive UI with Bootstrap
-
+- note: to login as shop admin, username: shop name, password: admin
 ---
 
