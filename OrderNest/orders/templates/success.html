@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block nav-elements %}
+  <li><a href="#">My orders</a></li>
+  <li><a href="{% url 'accounts:profile_view' %}">Profile</a></li>
+  <li><a href="{% url 'accounts:logout_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+{% endblock %}
+
+{% block main %}
+<div class="container py-4">
+  <h3>Thank you for your order!</h3>
+  <p>Your order ID is <strong>#{{ order_id }}</strong></p>
+  <a href="#" class="btn btn-primary">Return to Home</a>
+</div>
+{% endblock %}

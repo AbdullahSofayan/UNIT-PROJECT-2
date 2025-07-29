@@ -66,25 +66,32 @@ def sign_up_view(request: HttpRequest):
             full_name = form.cleaned_data['full_name']
             email = form.cleaned_data['email']
             phone = form.cleaned_data['phone']
-            address = form.cleaned_data['address']
+            address_text = form.cleaned_data['address'] 
 
             if User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
                 error_message = "Username or Email already exists."
             else:
-                User.objects.create(
+                user = User.objects.create(
                     username=username,
                     password=password,
                     full_name=full_name,
                     email=email,
                     role='customer',
-                    phone=phone,
-                    address=address
+                    phone=phone
+                )
+                Address.objects.create(
+                    user=user,
+                    title="Default",
+                    address=address_text,
+                    latitude=0.0,
+                    longitude=0.0
                 )
                 return redirect("main:home_view")
     else:
         form = SignUpForm()
 
     return render(request, "sign_up.html", {"form": form, "error_message": error_message})
+
 
 
 def logout_view(request):

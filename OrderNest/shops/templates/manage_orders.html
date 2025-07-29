@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Orders{% endblock %}
+
+{% block nav-elements %}
+    <li><a href="#">Shop</a></li>
+    <li><a href="{% url 'accounts:profile_view' %}">Profile</a></li>
+    <li><a href="{% url 'accounts:logout_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+{% endblock %}
+
+{% block main %}
+<div class="container py-5">
+  <h3 class="mb-4">📦 Manage Orders</h3>
+
+  {% if orders %}
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle text-center shadow-sm">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Method</th>
+            <th>Address / Branch</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Items</th>
+            <th>Change Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order in orders %}
+          <tr>
+            <td>#{{ order.id }}</td>
+            <td>
+              {{ order.customer_name }}<br>
+              <small>{{ order.customer.phone_number }}</small>
+            </td>
+            <td>
+                {% if order.method == 'delivery' %}
+                    Delivery
+                {% else %}
+                    Pickup
+                {% endif %}
+                </td>
+            <td>
+              {% if order.method == 'delivery' %}
+                {{ order.address.title }}<br>
+                <small>{{ order.address.address }}</small><br>
+                {% if order.address.latitude and order.address.longitude %}
+                  <a class="btn btn-sm btn-outline-secondary mt-1"
+                     href="https://www.google.com/maps?q={{ order.address.latitude }},{{ order.address.longitude }}"
+                     target="_blank">📍 View on Map</a>
+                {% endif %}
+              {% else %}
+                {{ order.branch.name }}
+                
+              {% endif %}
+            </td>
+            <td>{{ order.total_price }} SR</td>
+            <td>
+              <span id="status-badge-{{ order.id }}" class="badge bg-secondary">
+                {{ order.status|capfirst }}
+              </span>
+            </td>
+            <td>
+              <ul class="text-start small mb-0">
+                {% for item in order.items.all %}
+                  <li>
+                    {{ item.item.name }} × {{ item.quantity }}
+                    {% if item.options %}
+                      <ul>
+                        {% for opt in item.options.all %}
+                          <li>{{ opt.name }} (+{{ opt.extra_price }} SR)</li>
+                        {% endfor %}
+                      </ul>
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+            </td>
+            <td>
+              <form class="status-update-form" data-order-id="{{ order.id }}">
+                {% csrf_token %}
+                <select name="status" class="form-select form-select-sm mb-2">
+                  <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                  <option value="preparing" {% if order.status == 'preparing' %}selected{% endif %}>Preparing</option>
+                  <option value="out_for_delivery" {% if order.status == 'out_for_delivery' %}selected{% endif %}>Out for Delivery</option>
+                  <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Completed</option>
+                  <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+                <button type="submit" class="btn btn-sm btn-outline-primary w-100">Update</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-warning text-center shadow-sm">No orders found.</div>
+  {% endif %}
+</div>
+
+<!-- Status Updated Modal -->
+<div class="modal fade" id="statusUpdatedModal" tabindex="-1" aria-labelledby="statusUpdatedLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="statusUpdatedLabel">Status Updated</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        The order status has been updated successfully.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.status-update-form').forEach(form => {
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const orderId = this.getAttribute('data-order-id');
+    const formData = new FormData(this);
+    const csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+    const selectedStatus = this.querySelector('[name="status"]').value;
+
+    fetch(`/shops/update-status/${orderId}/`, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrfToken
+      },
+      body: formData
+    })
+    .then(response => {
+      if (response.ok) {
+        const badge = document.getElementById(`status-badge-${orderId}`);
+        if (badge) {
+          badge.textContent = selectedStatus.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('statusUpdatedModal'));
+        modal.show();
+      }
+    });
+  });
+});
+</script>
+
+{% endblock %}

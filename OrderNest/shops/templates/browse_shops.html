@@ -1,142 +1,157 @@
-    {% extends 'base.html' %}
-    {% load static %}
+{% extends 'base.html' %}
+{% load static %}
 
-    {% block title %}Browse Shops{% endblock %}
+{% block title %}Browse Shops{% endblock %}
 
-    {% block nav-elements %}
-        <li><a href="{% url 'orders:my_orders' %}">My orders</a></li>
-        <li><a href="{% url 'accounts:profile_view' %}">Profile</a></li>
-        <li><a href="{% url 'accounts:logout_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
-    {% endblock %}
+{% block nav-elements %}
+    <li><a href="{% url 'orders:my_orders' %}">My orders</a></li>
+    <li><a href="{% url 'accounts:profile_view' %}">Profile</a></li>
+    <li><a href="{% url 'accounts:logout_view' %}" class="login-btn" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</a></li>
+{% endblock %}
 
 {% block main %}
 <div class="container py-5">
-        
-    <form method="get" class="mb-4 d-flex justify-content-between flex-wrap gap-2">
 
-        <div class="d-flex align-items-center gap-2">
-            <label for="category" class="form-label mb-0 w-100">Filter by:</label>
-            <select name="category" id="category" class="form-select form-select-sm" onchange="this.form.submit()">
-            <option value="">All</option>
-            {% for id, name in categories %}
-                <option value="{{ id }}" {% if request.GET.category == id|stringformat:"s" %}selected{% endif %}>
-                {{ name }}
-                </option>
-            {% endfor %}
-            </select>
-        </div>
+  <!-- Category Buttons + Search Bar -->
+  <div class="d-flex flex-wrap align-items-center justify-content-start gap-2 mb-4">
 
-        <div class="d-flex align-items-center gap-2">
-            <input 
-            type="search" 
-            name="search" 
-            class="form-control form-control-sm" 
-            placeholder="Search by name..."
-            value="{{ request.GET.search|default:'' }}"
-            >
-            <button type="submit" class="btn btn-sm btn-outline-primary">Search</button>
-        </div>
+    <!-- All button -->
+    <a href="{% url 'shops:browse_shops_view' %}"
+       class="btn {% if not request.GET.category %}btn-warning{% else %}btn-outline-secondary{% endif %}">
+      All
+    </a>
 
+    <!-- Dynamic category buttons -->
+    {% for id, name in categories %}
+      <a href="?category={{ id }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}"
+         class="btn {% if request.GET.category == id|stringformat:'s' %}btn-warning{% else %}btn-outline-secondary{% endif %}">
+        {{ name }}
+      </a>
+    {% endfor %}
+
+    <!-- Search -->
+    <form method="get" class="ms-auto d-flex" style="max-width: 250px;">
+      {% if request.GET.category %}
+        <input type="hidden" name="category" value="{{ request.GET.category }}">
+      {% endif %}
+      <input 
+        type="search" 
+        name="search" 
+        class="form-control me-2" 
+        placeholder="Search by name..." 
+        value="{{ request.GET.search|default:'' }}"
+      >
+      <button type="submit" class="btn btn-outline-primary">Go</button>
     </form>
+  </div>
 
-    <div class="mb-3">
-        <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-warning text-dark fs-5 px-3 py-2">
-            {{ total_shops }}
-            </span>
-            <h4 class="m-0 fw-bold text-dark">
-            Shop{{ total_shops|pluralize }}
-            </h4>
-        </div>
-    </div>
+  <!-- Shop Count -->
+  <div class="mb-3 d-flex align-items-center gap-2">
+    <span class="badge bg-warning text-dark fs-5 px-3 py-2">{{ total_shops }}</span>
+    <h4 class="m-0 fw-bold text-dark">Shop{{ total_shops|pluralize }}</h4>
+  </div>
 
-
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-
-        {% if shops %}
-        
-            {% for shop in shops %}
-                <div class="col">
-                    <a href="{% url 'menu:menu_view' shop.id %}" style="text-decoration: none; color: black;">
-                        <div class="card h-100 shadow-sm border-0">
-                        
-                            <img src="{% static 'shops/images/' %}{{ shop.name|slugify }}.png"
-                                class="card-img-top"
-                                alt="{{ item.name }}"
-                                onerror="this.onerror=null;this.src='{% static 'shops/images/default.jpeg' %}'">
-                                    
-                                    
-
-                            <div class="card-body">
-                                <h5 class="card-title">{{ shop.name }}</h5>
-                                <p class="card-text text-muted mb-1"><strong>Rating:</strong> {{ shop.rating|default:"N/A" }}</p>
-
-                                <p class="card-text text-muted mb-1"><strong>Contact:</strong> {{ shop.contact_number }}</p>
-                                <p class="card-text text-muted mb-1"><strong>Category:</strong> {{ shop.category.name }}</p>
-                                <p class="card-text mt-2">{{ shop.description|truncatewords:20 }}</p>
-                            </div>
-                                    <div class="card-footer bg-transparent border-0 text-end">
-                                        <a href="{% url 'shops:branches_view' shop.id %}" class="btn btn-sm btn-warning">View Branches</a>
-                                    </div>
-                        </div>
-                    </a>
-                </div>
-            {% endfor %}
-        {% else %}
-        <div class="col-12 text-center mt-5">
-            <div class="alert alert-warning shadow-sm" role="alert" style="font-size: 1.1rem;">
-                No shops found for your search or filter.
+  <!-- Shops Grid -->
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+    {% if shops %}
+      {% for shop in shops %}
+        <div class="col">
+          <a href="{% url 'menu:menu_view' shop.id %}" style="text-decoration: none; color: black;">
+            <div class="card h-100 shadow-sm border-0">
+              <img src="{% static 'shops/images/' %}{{ shop.name|slugify }}.png"
+                   class="card-img-top"
+                   alt="{{ shop.name }}"
+                   onerror="this.onerror=null;this.src='{% static 'shops/images/default.jpeg' %}'">
+              <div class="card-body">
+                <h5 class="card-title">{{ shop.name }}</h5>
+                <p class="card-text text-muted mb-1"><strong>Rating:</strong> {{ shop.rating|default:"N/A" }}</p>
+                <p class="card-text text-muted mb-1"><strong>Contact:</strong> {{ shop.contact_number }}</p>
+                <p class="card-text text-muted mb-1"><strong>Category:</strong> {{ shop.category.name }}</p>
+                <p class="card-text mt-2">{{ shop.description|truncatewords:20 }}</p>
+              </div>
+              <div class="card-footer bg-transparent border-0 text-end">
+                <a href="{% url 'shops:branches_view' shop.id %}" class="btn btn-sm btn-warning">View Branches</a>
+              </div>
             </div>
+          </a>
         </div>
+      {% endfor %}
+    {% else %}
+      <div class="col-12 text-center mt-5">
+        <div class="alert alert-warning shadow-sm" role="alert" style="font-size: 1.1rem;">
+          No shops found for your search or filter.
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Pagination Controls -->
+<!-- Pagination Controls -->
+<div class="row mt-4">
+  <div class="col d-flex justify-content-center">
+    <nav>
+      <ul class="pagination gap-2 custom-pagination">
+
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link rounded-circle" href="?page=1" title="First Page">&laquo;</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link rounded-circle" href="?page={{ page_obj.previous_page_number }}" title="Previous">‹</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link rounded-circle">&laquo;</span></li>
+          <li class="page-item disabled"><span class="page-link rounded-circle">‹</span></li>
         {% endif %}
 
-    </div>
-    
-    <!-- Pagination Controls -->
-    <div class="row">
-    <div class="col d-flex justify-content-center">
-    <nav class="mt-2 d-flex justify-content-center">
-        <ul class="pagination">
+        <li class="page-item active">
+          <span class="page-link rounded-circle">
+            {{ page_obj.number }}
+          </span>
+        </li>
 
-            {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page=1">&laquo; First</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-            </li>
-            {% else %}
-            <li class="page-item disabled"><span class="page-link">&laquo; First</span></li>
-            <li class="page-item disabled"><span class="page-link">Previous</span></li>
-            {% endif %}
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link rounded-circle" href="?page={{ page_obj.next_page_number }}" title="Next">›</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link rounded-circle" href="?page={{ page_obj.paginator.num_pages }}" title="Last Page">&raquo;</a>
+          </li>
+        {% else %}
+          <li class="page-item disabled"><span class="page-link rounded-circle">›</span></li>
+          <li class="page-item disabled"><span class="page-link rounded-circle">&raquo;</span></li>
+        {% endif %}
 
-            <li class="page-item active">
-            <span class="page-link">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-            </span>
-            </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+</div>
 
-            {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
-            </li>
-            {% else %}
-            <li class="page-item disabled"><span class="page-link">Next</span></li>
-            <li class="page-item disabled"><span class="page-link">Last &raquo;</span></li>
-            {% endif %}
+<style>
+    .custom-pagination .page-link {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 50% !important;
+  text-align: center;
+  line-height: 42px;
+  font-weight: bold;
+  color: #333;
+  border: 1px solid #ddd;
+  transition: background-color 0.3s, color 0.3s;
+}
 
-        </ul>
-        </nav>
-    </div>
-    </div>
+.custom-pagination .page-item.active .page-link {
+  background-color: #ffc107;
+  color: #000;
+  border-color: #ffc107;
+}
 
+.custom-pagination .page-item .page-link:hover {
+  background-color: #f0ad00;
+  color: white;
+}
 
-
-
-    </div>
-
-
-    {% endblock %}
+</style>
+{% endblock %}

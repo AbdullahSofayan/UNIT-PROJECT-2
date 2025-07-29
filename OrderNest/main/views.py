@@ -7,3 +7,6 @@ from django.http import HttpRequest, HttpResponse
 def home_view(request:HttpRequest):
 
     return render(request, "home.html")
+
+def about_view(request):
+    return render(request, "about.html")

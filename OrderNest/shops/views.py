@@ -1,8 +1,10 @@
+from pyexpat.errors import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest
 from django.core.paginator import Paginator
 
 from OrderNest import settings
+from orders.models import Order
 from .forms import UpdateShopform, BranchForm
 from accounts.models import User
 from .models import Shop, Branch, ShopCategory
@@ -114,3 +116,25 @@ def edit_branch_view(request, branch_id, shop_id):
 
     # Optional if you want a standalone edit page later
     return render(request, "shops/edit_branch.html", {"branch": branch, "shop_id": shop_id})
+
+
+
+def manage_orders_view(request, shop_id):
+    shop = Shop.objects.get(pk=shop_id)
+    orders = Order.objects.filter(shop=shop)\
+        .select_related('customer', 'address', 'branch')\
+        .prefetch_related('items__item', 'items__options')
+
+    return render(request, 'manage_orders.html', {
+        'orders': orders,
+        'shop': shop,
+    })
+
+def update_order_status(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status:
+            order.status = new_status
+            order.save()
+    return redirect('shops:manage_orders')

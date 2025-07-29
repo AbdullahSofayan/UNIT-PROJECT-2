@@ -1,11 +1,11 @@
 from decimal import Decimal
 from pyexpat.errors import messages
 from django.shortcuts import get_object_or_404, redirect, render
-from orders.models import Cart, CartItem, Order, OrderItem, OrderItemOption
+from orders.models import Cart, CartItem, Order, OrderItem, OrderItemOption, Payment
 from menu.models import MenuItem, MenuItemOption
 from django.http import HttpRequest
 from shops.models import Branch, Shop 
-from .forms import CheckoutForm
+from .forms import CheckoutForm, PaymentForm
 from accounts.models import Address, User
 
 def get_or_create_cart(user, shop_id):
@@ -185,7 +185,7 @@ def edit_cart_item_view(request, shop_id, item_id):
 
 
 def checkout_view(request, shop_id):
-
+    
     user_id = request.session.get("customer_id")
     if not user_id:
         return redirect("accounts:login_view")
@@ -261,15 +261,7 @@ def checkout_view(request, shop_id):
                 )
 
         cart.delete()
-        return render(request, "checkout.html", {
-            "user": user,
-            "cart_items": [],
-            "total": 0,
-            "addresses": addresses,
-            "branches": branches,
-            "shop_id": shop_id,
-            "order_success": True,
-        })
+        return redirect('orders:payment_view', order_id=order.id)
 
 
     return render(request, "checkout.html", {
@@ -296,3 +288,34 @@ def my_orders_view(request):
         "orders": orders
     })
 
+def payment_view(request, order_id):
+    order = get_object_or_404(Order, id=order_id, customer_id=request.session.get("customer_id"))
+
+    if hasattr(order, 'payment') and order.payment.paid:
+        return redirect('orders:my_orders')
+
+    if request.method == 'POST':
+        form = PaymentForm(request.POST)
+        if form.is_valid():
+            method = form.cleaned_data['method']
+            if method == 'card':
+                # Simulate card validation
+                if not form.cleaned_data['card_number']:
+                    form.add_error('card_number', 'Card number is required for credit card payment.')
+                else:
+                    Payment.objects.create(order=order, method='credit_card', paid=True)
+                    order.status = Order.CONFIRMED
+                    order.save()
+                    return redirect('orders:my_orders')
+            elif method == 'cash':
+                Payment.objects.create(order=order, method='cash', paid=True)
+                order.status = Order.CONFIRMED
+                order.save()
+                return redirect('orders:my_orders')
+    else:
+        form = PaymentForm()
+
+    return render(request, 'payment_page.html', {
+        'form': form,
+        'order': order
+    })

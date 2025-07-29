@@ -4,8 +4,7 @@
 {% block title %}Login{% endblock %}
 
 {% block nav-elements %}
-    <li><a href="#">About</a></li>
-    <li><a href="#">Contact</a></li>
+    <li><a href="{% url 'main:about_view' %}">About</a></li>
     <li><a href="{% url 'accounts:login_view' %}" class="login-btn">Login</a></li>
 {% endblock %}
 

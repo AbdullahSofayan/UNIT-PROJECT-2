@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment{% endblock %}
+
+{% block main %}
+<div class="container py-5 d-flex justify-content-center">
+  <div class="card shadow-sm p-4" style="max-width: 500px; width: 100%;">
+    <h4 class="mb-4 text-center">💳 Complete Your Payment</h4>
+    
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <div class="mb-3">
+        <label class="form-label">Choose Payment Method</label>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="method" id="method-cash" value="cash">
+          <label class="form-check-label" for="method-cash">
+            💵 Cash on Delivery
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="method" id="method-card" value="card">
+          <label class="form-check-label" for="method-card">
+            💳 Credit Card
+          </label>
+        </div>
+      </div>
+
+      <div id="card-fields" class="d-none">
+        <div class="mb-3">
+          <label class="form-label" for="id_card_number">Card Number</label>
+          <input type="text" name="card_number" class="form-control" placeholder="Card Number" id="id_card_number">
+
+        </div>
+        <div class="mb-3 d-flex gap-3">
+          <div class="flex-fill">
+            <label class="form-label" for="id_card_expiry">Expiry (MM/YY)</label>
+           <input type="text" name="card_expiry" class="form-control" placeholder="MM/YY" id="id_card_expiry">
+
+          </div>
+          <div style="width: 100px;">
+            <label class="form-label" for="id_card_cvc">CVC</label>
+            <input type="text" name="card_cvc" class="form-control" placeholder="CVC" id="id_card_cvc">
+
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-success w-100 mt-3">✅ Pay Now</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const cardFields = document.getElementById("card-fields");
+    const methodRadios = document.querySelectorAll("input[name='method']");
+
+    methodRadios.forEach(radio => {
+      radio.addEventListener("change", function () {
+        cardFields.classList.toggle("d-none", this.value !== "card");
+      });
+    });
+  });
+</script>
+{% endblock %}

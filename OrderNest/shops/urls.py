@@ -12,6 +12,9 @@ urlpatterns = [
     path('branches/<int:shop_id>/add/', views.add_branch_view, name='add_branch_view'),
     path("shop/<int:branch_id>/branch/<int:shop_id>/delete/", views.delete_branch_view, name="delete_branch_view"),
     path('edit/<int:branch_id>/<int:shop_id>/', views.edit_branch_view, name='edit_branch_view'),
+    path('manage/<int:shop_id>', views.manage_orders_view, name='manage_orders'),
+    path('update-status/<int:order_id>/', views.update_order_status, name='update_status'),
+
 
 
 ]

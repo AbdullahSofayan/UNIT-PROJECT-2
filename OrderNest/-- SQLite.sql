@@ -213,4 +213,32 @@ VALUES
 
 UPDATE menu_menuitem SET category_id = 25 WHERE category_id = 29;
 
-DELETE from orders_orderitemoption
+DELETE from orders_orderitemoption;
+
+
+
+INSERT INTO accounts_user (username, password, email, full_name, role, phone, created_at, shop_id) VALUES
+('mcdonalds', 'pbkdf2_sha256$100000$suriz2gcl2rz6qJfJrts4zQ8Vu4ArkqsIq2xt/4uQ1GNz8DQ+2wD5q5oaZ0QBunC//g=', 'admin@mcdonalds.com', 'McDonalds Admin', 'admin', '920000001', '2025-07-28', 1),
+('kudu', 'pbkdf2_sha256$100000$suriz2gcl2rz6qJfJrts4zQ8Vu4ArkqsIq2xt/4uQ1GNz8DQ+2wD5q5oaZ0QBunC//g=', 'admin@kudu.com', 'Kudu Admin', 'admin', '966920006999', '2025-07-28', 2),
+('herfy', 'pbkdf2_sha256$100000$suriz2gcl2rz6qJfJrts4zQ8Vu4ArkqsIq2xt/4uQ1GNz8DQ+2wD5q5oaZ0QBunC//g=', 'admin@herfy.com', 'Herfy Admin', 'admin', '920000002', '2025-07-28', 3),
+('dunkindonuts', 'pbkdf2_sha256$100000$suriz2gcl2rz6qJfJrts4zQ8Vu4ArkqsIq2xt/4uQ1GNz8DQ+2wD5q5oaZ0QBunC//g=', 'admin@dunkin.com', 'Dunkin Donuts Admin', 'admin', '966920008899', '2025-07-28', 4),
+('starbucks', 'pbkdf2_sha256$100000$suriz2gcl2rz6qJfJrts4zQ8Vu4ArkqsIq2xt/4uQ1GNz8DQ+2wD5q5oaZ0QBunC//g=', 'admin@starbucks.com', 'Starbucks Admin', 'admin', '966920002482', '2025-07-28', 5),
+('krispykreme', 'pbkdf2_sha256$100000$suriz2gcl2rz6qJfJrts4zQ8Vu4ArkqsIq2xt/4uQ1GNz8DQ+2wD5q5oaZ0QBunC//g=', 'admin@krispykreme.com', 'Krispy Kreme Admin', 'admin', '966920005488', '2025-07-28', 6),
+('papajohns', 'pbkdf2_sha256$100000$suriz2gcl2rz6qJfJrts4zQ8Vu4ArkqsIq2xt/4uQ1GNz8DQ+2wD5q5oaZ0QBunC//g=', 'admin@papajohns.com', 'Papa Johns Admin', 'admin', '966920000727', '2025-07-28', 7),
+('albaik', 'pbkdf2_sha256$100000$suriz2gcl2rz6qJfJrts4zQ8Vu4ArkqsIq2xt/4uQ1GNz8DQ+2wD5q5oaZ0QBunC//g=', 'admin@albaik.com', 'AlBaik Admin', 'admin', '9668002442245', '2025-07-28', 8),
+('subway', 'pbkdf2_sha256$100000$suriz2gcl2rz6qJfJrts4zQ8Vu4ArkqsIq2xt/4uQ1GNz8DQ+2wD5q5oaZ0QBunC//g=', 'admin@subway.com', 'Subway Admin', 'admin', '966920025288', '2025-07-28', 9),
+('timhortons', 'pbkdf2_sha256$100000$suriz2gcl2rz6qJfJrts4zQ8Vu4ArkqsIq2xt/4uQ1GNz8DQ+2wD5q5oaZ0QBunC//g=', 'admin@timhortons.com', 'Tim Hortons Admin', 'admin', '966920002480', '2025-07-28', 10);
+
+
+
+
+
+
+
+INSERT INTO menu_menuitem (name, description, price, calories, category_id, shop_id)
+VALUES 
+('Double Cheesy Bacon Fries', 'Double the indulgence with crispy fries, cheddar cheese, burrito sauce, crispy bacon, and jalapeños.', 20, 520, 42, 2),
+('Cheesy Bacon Fries', 'Indulge in crispy French fries loaded with cheddar cheese, burrito sauce, crispy bacon, and green onions.', 16, 450, 42, 2),
+('French Cheese Bites', 'The delicious 4pcs French cheese bites is here in a new form with French cheese and dipping sauce.', 16, 390, 42, 2);
+
+

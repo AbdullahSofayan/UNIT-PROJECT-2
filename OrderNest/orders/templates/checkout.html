@@ -133,7 +133,7 @@
 </script>
 {% endif %}
 
-<!-- JS -->
+<!-- JavaScript -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const methodSelect = document.getElementById("method-select");
@@ -142,22 +142,41 @@ document.addEventListener("DOMContentLoaded", function () {
   const addressSelect = document.getElementById("address-select");
   const form = document.querySelector("form");
 
-  methodSelect.addEventListener("change", function () {
-    if (this.value === "delivery") {
-      deliveryFields.classList.remove("d-none");
-      pickupFields.classList.add("d-none");
-      addressSelect.disabled = false;  
+methodSelect.addEventListener("change", function () {
+  const method = this.value;
+  const branchInputs = document.querySelectorAll("input[name='branch_id']");
 
-    } else if (this.value === "pickup") {
-      pickupFields.classList.remove("d-none");
-      deliveryFields.classList.add("d-none");
-      addressSelect.disabled = true;
-    } else {
-      deliveryFields.classList.add("d-none");
-      pickupFields.classList.add("d-none");
-      addressSelect.disabled = true;
-    }
-  });
+  if (method === "delivery") {
+    deliveryFields.classList.remove("d-none");
+    pickupFields.classList.add("d-none");
+
+    addressSelect.disabled = false;
+
+    // Disable all branch inputs to avoid invalid form control error
+    branchInputs.forEach(input => {
+      input.disabled = true;
+    });
+
+  } else if (method === "pickup") {
+    pickupFields.classList.remove("d-none");
+    deliveryFields.classList.add("d-none");
+
+    addressSelect.disabled = true;
+
+    branchInputs.forEach(input => {
+      input.disabled = false;
+    });
+
+  } else {
+    deliveryFields.classList.add("d-none");
+    pickupFields.classList.add("d-none");
+
+    addressSelect.disabled = true;
+    branchInputs.forEach(input => {
+      input.disabled = true;
+    });
+  }
+});
 
   const cards = document.querySelectorAll(".branch-card");
   cards.forEach(card => {
@@ -169,31 +188,37 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  form.addEventListener("submit", function (e) {
-    const method = methodSelect.value;
-    if (!method) {
-      alert("Please select a method.");
+form.addEventListener("submit", function (e) {
+  const method = methodSelect.value;
+  console.log("Form submitted");
+  console.log("Method:", method);
+  console.log("Address:", addressSelect.value);
+
+  if (!method) {
+    alert("Please select a method.");
+    e.preventDefault();
+    return;
+  }
+
+  if (method === "delivery" && !addressSelect.value) {
+    console.warn("Blocked: No delivery address selected");
+    e.preventDefault();
+    return;
+  }
+
+  if (method === "pickup") {
+    const branchSelected = document.querySelector("input[name='branch_id']:checked");
+    if (!branchSelected) {
+      alert("Please select a branch.");
       e.preventDefault();
-      return;
     }
-
-    if (method === "delivery" && !addressSelect.value) {
-      alert("Please select a delivery address.");
-      e.preventDefault();
-    }
-
-    if (method === "pickup") {
-      const branchSelected = document.querySelector("input[name='branch_id']:checked");
-      if (!branchSelected) {
-        alert("Please select a branch.");
-        e.preventDefault();
-      }
-    }
-  });
-
-  methodSelect.dispatchEvent(new Event("change"));
+  }
 });
 
+
+  // Trigger change on page load to initialize UI
+  methodSelect.dispatchEvent(new Event("change"));
+});
 </script>
 
 <style>
