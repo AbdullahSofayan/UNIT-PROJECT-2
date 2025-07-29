@@ -20,3 +20,4 @@ A Django-based web application that allows users to browse restaurants,coffes, v
 ---
 
 - user stories: https://github.com/AbdullahSofayan/UNIT-PROJECT-2/blob/main/user_stories.pdf
+- UML : https://github.com/AbdullahSofayan/UNIT-PROJECT-2/blob/main/UML.drawio.pdf
