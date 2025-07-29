@@ -23,7 +23,7 @@ class Order(models.Model):
     ]
 
     customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders", null=True, blank=True)
-    address = models.ForeignKey(Address, on_delete=models.PROTECT, related_name="orders", null=True, blank=True)
+    address = models.ForeignKey(Address, on_delete=models.SET_NULL, related_name="orders", null=True, blank=True)
 
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE)
     # if method is pickup

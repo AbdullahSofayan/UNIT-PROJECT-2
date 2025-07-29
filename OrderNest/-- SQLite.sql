@@ -242,3 +242,7 @@ VALUES
 ('French Cheese Bites', 'The delicious 4pcs French cheese bites is here in a new form with French cheese and dipping sauce.', 16, 390, 42, 2);
 
 
+
+
+
+DELETE FROM orders_orderitemoption;
