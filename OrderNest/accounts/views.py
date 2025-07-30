@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+import re
 
 
 def login_view(request: HttpRequest):
@@ -54,6 +55,20 @@ def login_view(request: HttpRequest):
         "shop_form": shop_form,
     })
 
+def is_strong_password(password: str) -> bool:
+    """
+    Validate password strength:
+    - At least one uppercase letter
+    - At least one lowercase letter
+    - At least one digit
+    - Minimum length 8
+    """
+    if (len(password) < 8 or
+        not re.search(r"[A-Z]", password) or
+        not re.search(r"[a-z]", password) or
+        not re.search(r"[0-9]", password)):
+        return False
+    return True
 
 def sign_up_view(request: HttpRequest):
     error_message = None
@@ -68,12 +83,14 @@ def sign_up_view(request: HttpRequest):
             phone = form.cleaned_data['phone']
             address_text = form.cleaned_data['address'] 
 
-            if User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
+            if not is_strong_password(password):
+                error_message = "Password must be at least 8 characters, contain one uppercase, one lowercase, and one number."
+            elif User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists():
                 error_message = "Username or Email already exists."
             else:
                 user = User.objects.create(
                     username=username,
-                    password=password,
+                    password=make_password(password),
                     full_name=full_name,
                     email=email,
                     role='customer',
@@ -173,6 +190,9 @@ def reset_password_view(request:HttpRequest):
             messages.error(request, "old password is incorrect.")
         elif new_pass != confirm_pass:
             messages.error(request, "New passwords do not match.")
+        elif not is_strong_password(new_pass):
+            messages.error(request, "Password must be at least 8 characters, contain one uppercase, one lowercase, and one number.")
+
 
         else:
             user.password = make_password(new_pass)

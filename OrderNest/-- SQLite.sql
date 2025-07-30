@@ -245,4 +245,16 @@ VALUES
 
 
 
-DELETE FROM orders_orderitemoption;
+UPDATE menu_menuitem
+SET category_id = 44
+WHERE shop_id = 9
+  AND name IN (
+    'Chicken Guacamole Salad',
+    'Chicken Guacamole Salad Combo',
+    'Deluxe Tuna Salad',
+    'Deluxe Tuna Salad Combo',
+    'Make it your own Salad',
+    'Make it your own Salad Combo'
+  );
+
+

@@ -114,8 +114,7 @@ def edit_branch_view(request, branch_id, shop_id):
         branch.save()
         return redirect("shops:branches_view", shop_id=shop_id)
 
-    # Optional if you want a standalone edit page later
-    return render(request, "shops/edit_branch.html", {"branch": branch, "shop_id": shop_id})
+    return render(request, "edit_branch.html", {"branch": branch, "shop_id": shop_id})
 
 
 
